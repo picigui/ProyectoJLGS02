@@ -1,5 +1,5 @@
 import logo from './logo-pici130x177t.png';
-import '../styles/App.css';
+import '../styles/index.css';
 import React, { useReducer } from 'react';
 import iconFacebook from '../assets/icon-facebook.svg';
 import iconTwitter from '../assets/icon-twitter.svg';
@@ -7,6 +7,7 @@ import iconInstagram from '../assets/icon-instagram.svg';
 import iconEmail from '../assets/icon-email.png';
 import { Header } from '../components/Header';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 
 /***************  Carga de imagenes predeterminadas ************/
 
@@ -21,15 +22,15 @@ import img8 from '../assets/imagen08.jpg';
 import img9 from '../assets/imagen09.jpg';
 
 const imagenes = [
-  { url: img1, name: 'Imagen 1', value: 'galeryImagen1' },
-  { url: img2, name: 'Imagen 2', value: 'galeryImagen2' },
-  { url: img3, name: 'Imagen 3', value: 'galeryImagen3' },
-  { url: img4, name: 'Imagen 4', value: 'galeryImagen4' },
-  { url: img5, name: 'Imagen 5', value: 'galeryImagen5' },
-  { url: img6, name: 'Imagen 6', value: 'galeryImagen6' },
-  { url: img7, name: 'Imagen 7', value: 'galeryImagen7' },
-  { url: img8, name: 'Imagen 8', value: 'galeryImagen8' },
-  { url: img9, name: 'Imagen 9', value: 'galeryImagen9' },
+  { url: img1, name: 'Imagen 1', value: 'incluidasImagen1' },
+  { url: img2, name: 'Imagen 2', value: 'incluidasImagen2' },
+  { url: img3, name: 'Imagen 3', value: 'incluidasImagen3' },
+  { url: img4, name: 'Imagen 4', value: 'incluidasImagen4' },
+  { url: img5, name: 'Imagen 5', value: 'incluidasImagen5' },
+  { url: img6, name: 'Imagen 6', value: 'incluidasImagen6' },
+  { url: img7, name: 'Imagen 7', value: 'incluidasImagen7' },
+  { url: img8, name: 'Imagen 8', value: 'incluidasImagen8' },
+  { url: img9, name: 'Imagen 9', value: 'incluidasImagen9' },
 ];
 
 const niveles = [
@@ -59,20 +60,10 @@ const niveles = [
   },
 ];
 
-//let imageURL = img1;
-//let imageURL = document.getElementById('img1');
 //import styled from 'styled-components';
 //import { Helmet } from 'react-helmet';
-//img1.src = './assets/titanic1.jpg';
 
-//debugger;
-//  const [imageURL, setImageUrl] = useState(img1);
-//  var c = document.getElementById('myCanvas');
-//  c.imgSrc = imageURL;
-//  var ctx = c.getContext('2d');
-//  ctx.fillRect(100, 10, 300, 600);
-
-init();
+//init();
 function init() {
   return {
     imageURL: imagenes[0].url,
@@ -84,33 +75,50 @@ function init() {
   };
 }
 console.log({ img1 });
-function reducer(state, action) {
+function configJuegoReducer(state, action) {
   debugger;
   switch (action.type) {
-    case 'galeryImagen1':
+    // ********** eleccion de la fuente de la imagen ***********
+    case 'imgIncluidas':
+      return { ...state, sourceImagen: 'imgIncluidas' };
+    case 'imgAPI':
+      return { ...state, sourceImagen: 'imgAPI' };
+    case 'imgGaleria':
+      return { ...state, sourceImagen: 'imgGaleria' };
+
+    // ********** eleccion de la fuente de la imagen ***********
+    case 'incluidasImagen1':
       return { ...state, imageURL: imagenes[0].url };
-    case 'galeryImagen2':
+    case 'incluidasImagen2':
       return { ...state, imageURL: imagenes[1].url };
-    case 'galeryImagen3':
+    case 'incluidasImagen3':
       return { ...state, imageURL: imagenes[2].url };
-    case 'galeryImagen4':
+    case 'incluidasImagen4':
       return { ...state, imageURL: imagenes[3].url };
-    case 'galeryImagen5':
+    case 'incluidasImagen5':
       return { ...state, imageURL: imagenes[4].url };
-    case 'galeryImagen6':
+    case 'incluidasImagen6':
       return { ...state, imageURL: imagenes[5].url };
-    case 'galeryImagen7':
+    case 'incluidasImagen7':
       return { ...state, imageURL: imagenes[6].url };
-    case 'galeryImagen8':
+    case 'incluidasImagen8':
       return { ...state, imageURL: imagenes[7].url };
-    case 'galeryImagen9':
+    case 'incluidasImagen9':
       return { ...state, imageURL: imagenes[8].url };
+
+    // ************ imagenes de la galeria del usuario **********
+    case 'imagenGaleria':
+      return { ...state, imageURL: action.payload };
+
+    // ************** imagenes vertical/apaisado *****************
     case 'apaisada':
       document.querySelector('.foto').id = 'apaisada';
       return { ...state, apaisada: true };
     case 'apaisadaNo':
       document.querySelector('.foto').id = 'apaisada-no';
       return { ...state, apaisada: false };
+
+    // ************** eleccion del nivel de juego ***************
     case 'n1':
       for (let i = 0; i < niveles.length; i++) {
         niveles[i].seleccionado = false;
@@ -129,15 +137,8 @@ function reducer(state, action) {
       }
       niveles[2].seleccionado = true;
       return { ...state, nivelSeleccionado: niveles[2] };
-    case 'imgIncluidas':
-      return { ...state, sourceImagen: 'imgIncluidas' };
-    case 'imgAPI':
-      return { ...state, sourceImagen: 'imgAPI' };
-    case 'imgGaleria':
-      return { ...state, sourceImagen: 'imgGaleria' };
 
-    case 'initImageURL':
-      return init();
+    // ************** si el dispatch no tiene case *****************
     default:
       throw new Error();
   }
@@ -145,7 +146,7 @@ function reducer(state, action) {
 
 function Home({ initialState }) {
   debugger;
-  const [state, dispatch] = useReducer(reducer, initialState, init);
+  const [state, dispatch] = useReducer(configJuegoReducer, initialState, init);
   const changeSelectedImg = (e) => {
     dispatch({ type: e.target.value });
   };
@@ -156,14 +157,12 @@ function Home({ initialState }) {
   };
 
   function mostrarImagenElegida(event) {
-    //if (event){
     let file = event.target.files[0];
-    console.log(event.target.files[0]);
-    //let file = '../images/logo-pici.jpeg';
+    //  console.log(event.target.files[0]);
     let reader = new FileReader('');
     reader.onload = function (event) {
-      dispatch(event.target.result);
-      console.log(event.target.result);
+      dispatch({ type: 'imagenGaleria', payload: event.target.result });
+      //  console.log(event.target.result);
     };
     reader.readAsDataURL(file);
   }
@@ -172,12 +171,21 @@ function Home({ initialState }) {
   }
   return (
     <>
+      <Helmet>
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="24x33"
+          href="../assets/logo-pici24x33.png"
+        />
+        <title>Pici - Puzzle {'Home'} 😀</title>
+      </Helmet>
       <Header />
       <main>
         <h2>Configura tu imagen del Pici-Puzzle</h2>
         <br></br>
         <div className="elegir-fuente-imagen">
-          {/*************** Elección del origen de la imagen  ***************************/}
+          {/*************** Elección del origen de la imagen  ********************/}
 
           <input
             type="radio"
@@ -205,9 +213,8 @@ function Home({ initialState }) {
           />
           <label for="imgGaleria"> De tus Galeria </label>
 
-          {/********** selección de la imagen incluidas en la APP *************/}
-
           <div className="cuadro-carga-imagen">
+            {/********** selección de la imagen incluidas en la APP *************/}
             <div
               className={`elegir-source imgIncluidas ${
                 state.sourceImagen === 'imgIncluidas' ? 'elegido' : ''
@@ -221,8 +228,6 @@ function Home({ initialState }) {
                 id="img-incluida"
                 onChange={(e) => changeSelectedImg(e)}
               >
-                {/** el selected no se queda en el html **/}
-
                 {state.imagenes.map((img) => (
                   <option
                     selected={state.imageURL === img.url}
@@ -238,14 +243,22 @@ function Home({ initialState }) {
 
             {/*************** selección de la imagen en la API *******************/}
 
-            <div className="elegir-source imgAPI">
+            <div
+              className={`elegir-source imgAPI ${
+                state.sourceImagen === 'imgAPI' ? 'elegido' : ''
+              }`}
+            >
               <label for="api">Url de la API</label>
               <input type="url" id="api" />
             </div>
 
             {/*************** selección de la imagen en la Galeria *******************/}
 
-            <div className="elegir-source imgGaleria">
+            <div
+              className={`elegir-source imgGaleria ${
+                state.sourceImagen === 'imgGaleria' ? 'elegido' : ''
+              }`}
+            >
               <input
                 id="inputFile1"
                 onChange={mostrarImagenElegida}
@@ -282,8 +295,14 @@ function Home({ initialState }) {
 
         {/*************** presentacion de la imagen elegida ***************************/}
 
-        <div className="foto" id="apaisadaNo">
-          <img className="img-foto" src={state.imageURL} alt="imagen elegida" />
+        <div className="marco-foto">
+          <div className="foto" id="apaisadaNo">
+            <img
+              className="img-foto"
+              src={state.imageURL}
+              alt="imagen elegida"
+            />
+          </div>
         </div>
 
         {/*************** Elección del nivel de juego ***************************/}
@@ -296,7 +315,6 @@ function Home({ initialState }) {
               id="nivel"
               onChange={(e) => changeSelectedNivel(e)}
             >
-              {console.log({ niveles })}
               {state.niveles.map((nivel) => (
                 <option
                   selected={nivel.seleccionado}
@@ -311,11 +329,6 @@ function Home({ initialState }) {
           </form>
         </div>
 
-        <h1>The canvas element</h1>
-
-        <canvas id="myCanvas">
-          Your browser does not support the canvas tag.
-        </canvas>
         <button onClick={irAlJuego}>Jugar</button>
       </main>
       <footer>

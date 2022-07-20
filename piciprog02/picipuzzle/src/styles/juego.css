@@ -1,5 +1,5 @@
-@import url(./normalize.css);
-@import url(./global.css);
+/*@import './normalize.css';*/
+/*@import './global.css';*/
 
 html {
   height: 100%;
@@ -86,7 +86,7 @@ img {
   height: 400px;
 }
 .prueba-img {
-  background-image: url(../images/foto300x400.jpg);
+  background-image: url(../components/images/logo-pici.jpg);
   background-position: -100px -266px;
   background-size: 300px 400px;
   width: 97px;
