@@ -1,144 +1,171 @@
 import React, { useReducer } from 'react';
+import ReactCrop from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 import { Helmet } from 'react-helmet';
 //import { Link } from 'react-router-dom';
-import iconFacebook from '../assets/icon-facebook.svg';
-import iconTwitter from '../assets/icon-twitter.svg';
-import iconInstagram from '../assets/icon-instagram.svg';
-import iconEmail from '../assets/icon-email.png';
-import logo from './logo-pici130x177t.png';
-//import '../styles/juego.css';
+import '../styles/juego.css';
 import { Header } from '../components/Header';
-import img1 from '../assets/imagen06.jpg';
+import fotoElegida from './imagen06.jpg';
 
 let rows = 3;
 let cols = 3;
+let width = 300;
+let height = 400;
+
 let actualPieza;
 let piezaVacia;
 let piezaFuera;
+let ultimaPieza;
 let siCompleto = false;
 
 let arrayCanvas = [
-  { nombCanvas: 'canvas00', posW: '0', posH: '0' },
-  { nombCanvas: 'canvas01', posW: '0', posH: '-100' },
-  { nombCanvas: 'canvas02', posW: '0', posH: '-200' },
-  { nombCanvas: 'canvas03', posW: '-100', posH: '0' },
-  { nombCanvas: 'canvas04', posW: '-100', posH: '-100' },
-  { nombCanvas: 'canvas05', posW: '-100', posH: '-200' },
-  { nombCanvas: 'canvas06', posW: '-200', posH: '0' },
-  { nombCanvas: 'canvas07', posW: '-200', posH: '-100' },
-  { nombCanvas: 'canvas08', posW: '-200', posH: '-200' },
+  { nombCanvas: 'canvas00', posW: 0, posH: 0 },
+  { nombCanvas: 'canvas01', posW: 0, posH: -100 },
+  { nombCanvas: 'canvas02', posW: 0, posH: -200 },
+  { nombCanvas: 'canvas03', posW: -100, posH: 0 },
+  { nombCanvas: 'canvas04', posW: -100, posH: -100 },
+  { nombCanvas: 'canvas05', posW: -100, posH: -200 },
+  { nombCanvas: 'canvas06', posW: -200, posH: 0 },
+  { nombCanvas: 'canvas07', posW: -200, posH: -100 },
+  { nombCanvas: 'canvas08', posW: -200, posH: -200 },
 ];
 let arrayPiezas = [
-  { id: 'img0-0', src: './logo-pici130x177t.png', nImg: '1', nOrdImg: '0' },
-  { id: 'img0-1', src: './logo-pici130x177t.png', nImg: '2', nOrdImg: '1' },
-  { id: 'img0-2', src: './logo-pici130x177t.png', nImg: '3', nOrdImg: '2' },
-  { id: 'img1-0', src: './logo-pici130x177t.png', nImg: '4', nOrdImg: '3' },
-  { id: 'img1-1', src: './logo-pici130x177t.png', nImg: '5', nOrdImg: '4' },
-  { id: 'img1-2', src: './logo-pici130x177t.png', nImg: '6', nOrdImg: '5' },
-  { id: 'img2-0', src: './logo-pici130x177t.png', nImg: '7', nOrdImg: '6' },
-  { id: 'img2-1', src: './logo-pici130x177t.png', nImg: '8', nOrdImg: '7' },
-  { id: 'img2-2', src: './logo-pici130x177t.png', nImg: '9', nOrdImg: '8' },
+  { id: 'img0-0', src: './logo-pici130x177t.png', nImg: 1, nOrdImg: 0 },
+  { id: 'img0-1', src: './logo-pici130x177t.png', nImg: 2, nOrdImg: 1 },
+  { id: 'img0-2', src: './logo-pici130x177t.png', nImg: 3, nOrdImg: 2 },
+  { id: 'img1-0', src: './logo-pici130x177t.png', nImg: 4, nOrdImg: 3 },
+  { id: 'img1-1', src: './logo-pici130x177t.png', nImg: 5, nOrdImg: 4 },
+  { id: 'img1-2', src: './logo-pici130x177t.png', nImg: 6, nOrdImg: 5 },
+  { id: 'img2-0', src: './logo-pici130x177t.png', nImg: 7, nOrdImg: 6 },
+  { id: 'img2-1', src: './logo-pici130x177t.png', nImg: 8, nOrdImg: 7 },
+  { id: 'img2-2', src: './logo-pici130x177t.png', nImg: 9, nOrdImg: 8 },
 ];
 
-// let imagenVacia;
-//let imagenVaciaNImg;
-// turns = 0;
-//let ultimaPieza;
-//let pieza;
-//let piezaA;
-//let piezaB;
-
 // valores que debo recibir de la pagina home
-let imageURL = img1;
+let imageURL = fotoElegida;
+imageURL = document.createElement('img');
+fotoElegida = imageURL.src;
 let apaisada = false;
 let nivelSeleccionado = 'n1';
 
-let imgOrderResultadoCorrecto; // = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-let imgOrder = ['4', '2', '8', '5', '1', '6', '7', '0', '3'];
+let imgOrderResultadoCorrecto = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+let imgOrder = [4, 2, 8, 5, 1, 6, 7, 0, 3];
 
-function crearPiezasCanvas(imageURL) {
+debugger;
+function crearPiezasCanvas() {
+  //debugger;
   let i = 0;
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       // Creando las piezas canvas
-      let ctx = arrayCanvas(i).nombCanvas.getContext('2d');
-      ctx.drawImage(imageURL, arrayCanvas(i).posW, arrayCanvas(i).posH);
+      let piezaCanvas = document.createElement('canvas');
+      piezaCanvas.id = arrayCanvas[i].nombCanvas;
+      piezaCanvas.width = width / cols;
+      piezaCanvas.height = height / rows;
+      //      piezaCanvas = document.getElementById(piezaCanvas.id);
+      let ctx = piezaCanvas.getContext('2d');
+      ctx.drawImage(imageURL, arrayCanvas[i].posW, arrayCanvas[i].posH);
       // Creando las piezas imagenes
-      const dataURL = arrayCanvas(i).nombreVar.toDataURL();
-      arrayPiezas(i).id = 'img' + r.toString() + '-' + c.toString(); // 'img0-0'...'img2-2'
-      arrayPiezas(i).src = dataURL;
-      arrayPiezas(i).nImg = (i + 1).toString;
-      arrayPiezas(i).nOrdImg = i;
+      const dataURL = piezaCanvas.toDataURL();
+      arrayPiezas[i] = document.createElement('img');
+
+      arrayPiezas[i].id = 'img' + r.toString() + '-' + c.toString(); // 'img0-0'...'img2-2'
+      arrayPiezas[i].src = dataURL;
+      arrayPiezas[i].nImg = i + 1;
+      arrayPiezas[i].nOrdImg = i;
 
       // se inicia la variable con la colocacion correcta
-      imgOrderResultadoCorrecto[i] = (i + 1).toString;
-
+      imgOrderResultadoCorrecto[i] = i + 1;
+      //debugger;
       if (r === rows - 1 && c === cols - 1) {
-        piezaFuera = document.querySelector('.img-pieza-fuera');
-        piezaFuera = { ...pieza };
-        //piezaVacia = { ...pieza };
-        piezaFuera.src = '../images/0.jpg';
+        piezaFuera = { ...arrayPiezas[i] };
+        piezaFuera = document.createElement('img');
+        ultimaPieza = { ...arrayPiezas[i] };
+        piezaFuera.src = './0.jpg';
         piezaFuera.id = 'vacia';
-        // piezaVacia.src = piezaFuera.src;
-        // piezaVacia.id = 'vacia';
-        // ultimaPieza.src = '../images/9.jpg';
-        // piezaFuera = pieza;
-        piezaFuera.src = '../images/9.jpg';
-        piezaFuera.id = '2-2';
-        document.getElementById('img-pieza-fuera').src = piezaFuera.src;
-        // debugger;
+        piezaFuera.addEventListener('dragstart', dragStart);
+        // mover una imagen mientras esta clikeada.
+        piezaFuera.addEventListener('dragover', dragOver);
+        // dejar una imagen en otro lugar
+        piezaFuera.addEventListener('dragenter', dragEnter);
+        // arrastrar la imagen a otra imagen
+        piezaFuera.addEventListener('dragleave', dragLeave);
+        // arrastrar la imagen a otra imagen, suelta la imagen
+        piezaFuera.addEventListener('drop', dragDrop);
+        // despues de arrastrar y soltar, intercambie los dos piezas
+        piezaFuera.addEventListener('dragend', dragEnd);
+
+        //debugger;
       }
+      // Creando los eventos del moviemiento de piezas
+      // hacer click en una imagen para mover
+      arrayPiezas[i].addEventListener('dragstart', dragStart);
+      // mover una imagen mientras esta clikeada.
+      arrayPiezas[i].addEventListener('dragover', dragOver);
+      // dejar una imagen en otro lugar
+      arrayPiezas[i].addEventListener('dragenter', dragEnter);
+      // arrastrar la imagen a otra imagen
+      arrayPiezas[i].addEventListener('dragleave', dragLeave);
+      // arrastrar la imagen a otra imagen, suelta la imagen
+      arrayPiezas[i].addEventListener('drop', dragDrop);
+      // despues de arrastrar y soltar, intercambie los dos piezas
+      arrayPiezas[i].addEventListener('dragend', dragEnd);
+      //debugger;
       i++;
     }
   }
 }
 
-function agregarEventosImg(piezaImg) {
-  // Creando los eventos del moviemiento de piezas
-  // hacer click en una imagen para mover
-  piezaImg.addEventListener('dragstart', dragStart);
-  // mover una imagen mientras esta clikeada.
-  piezaImg.addEventListener('dragover', dragOver);
-  // dejar una imagen en otro lugar
-  piezaImg.addEventListener('dragenter', dragEnter);
-  // arrastrar la imagen a otra imagen
-  piezaImg.addEventListener('dragleave', dragLeave);
-  // arrastrar la imagen a otra imagen, suelta la imagen
-  piezaImg.addEventListener('drop', dragDrop);
-  // despues de arrastrar y soltar, intercambie los dos piezas
-  piezaImg.addEventListener('dragend', dragEnd);
-}
+//function agregarEventosImg(img) {
+//  //debugger;
+//  img = document.createElement('img');
+//  img = document.getElementById(img.id);
+//  // Creando los eventos del moviemiento de piezas
+//  // hacer click en una imagen para mover
+//  img.addEventListener('dragstart', dragStart);
+//  // mover una imagen mientras esta clikeada.
+//  img.addEventListener('dragover', dragOver);
+//  // dejar una imagen en otro lugar
+//  img.addEventListener('dragenter', dragEnter);
+//  // arrastrar la imagen a otra imagen
+//  img.addEventListener('dragleave', dragLeave);
+//  // arrastrar la imagen a otra imagen, suelta la imagen
+//  img.addEventListener('drop', dragDrop);
+//  // despues de arrastrar y soltar, intercambie los dos piezas
+//  img.addEventListener('dragend', dragEnd);
+//  return <img src={img.src} id={img.id} key={img.src} alt={img.id} />;
+//}
 
 // Valores iniciales para los reduce de esta pagina
-function init() {
+//function init() {
+//  return {
+//    //    ordenPiezas: arrayPiezas,
+//  };
+//}
+// console.log({ img1 });
+//function juegoReducer(state, action) {
+//  //debugger;
+//  switch (action.type) {
+//    // ********** Cambio de la imagen elegida ***********
+//    case 'imgIncluidas':
+//      return { ...state, sourceImagen: 'imgIncluidas' };
+//    case 'imgAPI':
+//      return { ...state, sourceImagen: 'imgAPI' };
+//    case 'imgGaleria':
+//      return { ...state, sourceImagen: 'imgGaleria' };
+//
+//    // ************** si el dispatch no tiene case *****************
+//    default:
+//      throw new Error();
+//  }
+//}
+
+//function Juego({ initialStateJuego }) {
+//  //debugger;
+//  const [state, dispatch] = useReducer(juegoReducer, initialStateJuego, init);
+function Juego() {
   crearPiezasCanvas();
-  return {
-    ordenPiezas: arrayPiezas,
-    imgOrderResultadoCorrecto: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-    imgOrder: ['4', '2', '8', '5', '1', '6', '7', '0', '3'],
-  };
-}
-console.log({ img1 });
-function juegoReducer(state, action) {
-  debugger;
-  switch (action.type) {
-    // ********** eleccion de la fuente de la imagen ***********
-    case 'imgIncluidas':
-      return { ...state, sourceImagen: 'imgIncluidas' };
-    case 'imgAPI':
-      return { ...state, sourceImagen: 'imgAPI' };
-    case 'imgGaleria':
-      return { ...state, sourceImagen: 'imgGaleria' };
-
-    // ************** si el dispatch no tiene case *****************
-    default:
-      throw new Error();
-  }
-}
-
-function Juego({ initialStateJuego }) {
-  debugger;
-  const [state, dispatch] = useReducer(juegoReducer, initialStateJuego, init);
+  //const [state, dispatch] = useReducer(juegoReducer, init);
   //  let i = 0;
   //  for (let r = 0; r < rows; r++) {
   //    for (let c = 0; c < cols; c++) {
@@ -206,98 +233,62 @@ function Juego({ initialStateJuego }) {
       </Helmet>
       <Header />
       <main>
-        <div class="juego">
+        <div className="juego">
           {/*************** presentacion de la imagen elegida *******************/}
 
           <div className="marco-foto">
-            <div className="foto" id="apaisadaNo">
-              <img id="img1" src={imageURL} alt="imagen elegida" />
+            <div className="foto apaisadaNo" id="foto-elegida">
+              <img
+                className="img-foto"
+                src={fotoElegida}
+                alt="imagen elegida"
+              ></img>
             </div>
           </div>
 
           {/*************** Mensaje para presentar al final del juego *************/}
-          <h2 class="mensaje-gano">!!! Puzzle Completado ¡¡¡</h2>
+          <h2 className="mensaje-gano">!!! Puzzle Completado ¡¡¡</h2>
 
           {/*************** Relleno del tablero de juego en canvas **************/}
-          <canvas id="myCanvas">
-            Your browser does not support the canvas tag.
-          </canvas>
           {/*************** presentacion del tablero de juego ********************/}
-          <div class="grid-tablero" id="tablero">
-            {state.arrayPiezas.map((img) => (
-              <img src={img.src} id={img.id} key={img.src} alt={img.id}>
-                {agregarEventosImg(img)}
-              </img>
-            ))}
+          <div className="grid-tablero" id="tablero">
+            {arrayPiezas.map((img, index) => {
+              return (
+                <img
+                  src={img.src}
+                  id={img.id}
+                  key={img.src + img.id}
+                  alt={img.id}
+                ></img>
+              );
+            })}
           </div>
+          {/* agregarEventosImg(img, index);*/}
 
           {/***** Grid que contiene el avance del juego y la ultima pieza *******/}
-          <div class="grid-ultima-pieza">
-            <div class="h3-mov-time">
-              <h3 class="h3-movimientos">
+          <div className="grid-ultima-pieza">
+            <div className="h3-mov-time">
+              <h3 className="h3-movimientos">
                 Movimientos: <span id="movimientos">0</span>
               </h3>
-              <h3 class="h3-tiempo">
+              <h3 className="h3-tiempo">
                 Tiempo: <span id="tiempo">0</span>
               </h3>
-              <div class="empezar">
-                <button class="btn-empezar" type="button">
+              <div className="empezar">
+                <button className="btn-empezar" type="button">
                   Empezar
                 </button>
               </div>
             </div>
             <img
-              class="img-pieza-fuera"
-              src="./images/0.jpg"
-              id="img-pieza-fuera"
+              className="img-pieza-fuera"
+              src={piezaFuera.src}
+              id={piezaFuera.id}
               alt="img-pieza-fuera"
             />
           </div>
-          <div class="prueba-img" id="prueba-img"></div>
         </div>
       </main>
-      <footer>
-        <div className="grid-container_footer">
-          <picture className="logo-footer">
-            <img src={logo} alt="Logo Pici" />
-          </picture>
-          <div className="icons-redes">
-            <a
-              href="https://es-es.facebook.com/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img src={iconFacebook} alt="Facebook" />
-            </a>
-            <a
-              href="https://www.instagram.com/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img src={iconInstagram} alt="Instagram" />
-            </a>
-          </div>
-          <p className="p_icons-contacto">Contacto:</p>
-          <div className="div-a-icons">
-            <a
-              href="mailto:picigui@hotmail.com"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img src={iconEmail} alt="Icon-mailto:picigui@hotmail.com" />
-            </a>
-            <a href="https://twitter.com/" target="_blank" rel="noreferrer">
-              <img src={iconTwitter} alt="Twitter" />
-            </a>
-          </div>
-          <div className="pie-footer">
-            <p className="attribution">
-              Desde Gran Canaria hecho con <span className="corazon">♥</span>{' '}
-              para el mundo.
-            </p>
-          </div>
-        </div>
-      </footer>
     </>
   );
 }
