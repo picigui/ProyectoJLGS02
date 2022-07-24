@@ -8,7 +8,7 @@ import img7 from '../assets/imagen07.jpg';
 import img8 from '../assets/imagen08.jpg';
 import img9 from '../assets/imagen09.jpg';
 
-export const imagenes = [
+const imagenes = [
   { url: img1, name: 'Imagen 1' },
   { url: img2, name: 'Imagen 2' },
   { url: img3, name: 'Imagen 3' },
@@ -19,3 +19,7 @@ export const imagenes = [
   { url: img8, name: 'Imagen 8' },
   { url: img9, name: 'Imagen 9' },
 ];
+
+export function getImagenes() {
+  return imagenes;
+}

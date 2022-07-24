@@ -55,7 +55,10 @@ function init(initial) {
 function juegoReducer(state, action) {
   switch (action.type) {
     case 'crearPiezas':
-      return { ...state, piezas: action.payload };
+      return {
+        ...state,
+        piezas: action.payload,
+      };
     case 'iniciado':
       return { ...state, iniciado: true };
     // ************** si el dispatch no tiene case *****************
@@ -126,14 +129,14 @@ function Juego(initialStateJuego) {
         //debugger;
         if (r === state.filas - 1 && c === state.columnas - 1) {
           ultimaPieza = { ...arrayPiezas[i] };
-          const piezaVacia = document.querySelector('.img-pieza-fuera');
-          ctx.drawImage(piezaVacia, posW, posH, state.ancho, state.alto);
-          const dataURL = piezaCanvas.toDataURL();
-          piezaFuera = document.querySelector('.img-pieza-fuera');
-          piezaFuera.src = dataURL;
-          piezaFuera.id = 'vacia';
-          piezaFuera.nImg = i + 1;
-          piezaFuera.nOrdImg = i;
+          // const piezaVacia = document.querySelector('.img-pieza-fuera');
+          // ctx.drawImage(piezaVacia, posW, posH, state.ancho, state.alto);
+          // const dataURL = piezaCanvas.toDataURL();
+          // piezaFuera = document.querySelector('.img-pieza-fuera');
+          // piezaFuera.src = dataURL;
+          // piezaFuera.id = 'vacia';
+          // piezaFuera.nImg = i + 1;
+          // piezaFuera.nOrdImg = i;
           imgOrderRamdon[i] = 0;
 
           debugger;
@@ -223,7 +226,7 @@ function Juego(initialStateJuego) {
       piezaVacia.id = actualImgId;
       piezaVacia.nOrdImg = actualImgNumOrdImg;
       piezaVacia.nImg = '0';
-      reordenarTablero(actualImgNImg, actualImgNumOrdImg);
+      // reordenarTablero(actualImgNImg, actualImgNumOrdImg);
       console.log(
         'actualImgNImg',
         actualImgNImg,
@@ -235,113 +238,36 @@ function Juego(initialStateJuego) {
     //renderizarJuego();
   }
 
-  //reordenar el Grid
-  //let imgOrderRamdon = ['4', '2', '8', '5', '1', '6', '7', '0', '3'];
-  // function renderizarJuego() {
-  //   // const { grid, move, time, status } = this.stat
-  //   // Redibujar el Grid-Tablero
-  //   const newGrid = document.createElement('div');
-  //   newGrid.className = 'grid-tablero';
-  //   newGrid.id = 'tablero';
-  //   let i = 0;
-  //   for (let r = 0; r < filas; r++) {
-  //     for (let c = 0; c < columnas; c++) {
-  //       // Creando las piezas
-  //       let pieza = document.createElement('img');
-  //       pieza.id = r.toString() + '-' + c.toString(); // '0-0'...'2-2'
-  //       pieza.src = '../images/' + imgOrderRamdon[i] + '.jpg';
-  //       pieza.nImg = imgOrderRamdon[i];
-  //       pieza.nOrdImg = i;
-  //       //debugger;
-  //       if (imgOrderRamdon[i] === '0') {
-  //         piezaVacia = { ...pieza };
-  //       }
-  //       i++;
-  //       // Creando los eventos del moviemiento de piezas
-  //       // hacer click en una imagen para mover
-  //       pieza.addEventListener('dragstart', dragStart);
-  //       // mover una imagen mientras esta clikeada.
-  //       pieza.addEventListener('dragover', dragOver);
-  //       // dejar una imagen en otro lugar
-  //       pieza.addEventListener('dragenter', dragEnter);
-  //       // arrastrar la imagen a otra imagen
-  //       pieza.addEventListener('dragleave', dragLeave);
-  //       // arrastrar la imagen a otra imagen, suelta la imagen
-  //       pieza.addEventListener('drop', dragDrop);
-  //       // despues de arrastrar y soltar, intercambie los dos piezas
-  //       pieza.addEventListener('dragend', dragEnd);
-  //       //      debugger;
-  //       newGrid.append(pieza);
+  function empezarJuego(actualImgNImg, actualImgNumOrdImg) {
+    imgOrderRamdon = [...imgOrderResultadoCorrecto];
+    imgOrderRamdon[imgOrderRamdon.length - 1] = 0;
+    piezaFuera = state.Piezas[imgOrderRamdon.length - 1];
+    // Returns a random integer from 0 to 10:
+    Math.floor(Math.random() * 11);
+    // let ultimaPieza = { ...arrayPiezas[i] };
+    // ctx.drawImage(ultimaPieza, posW, posH, state.ancho, state.alto);
+    // const dataURL = piezaCanvas.toDataURL();
+    // piezaFuera = document.querySelector('.img-pieza-fuera');
+    // piezaFuera.src = dataURL;
+    // piezaFuera.id = 'vacia';
+    // piezaFuera.nImg = i + 1;
+    // piezaFuera.nOrdImg = i;
+    // imgOrderRamdon[i] = 0;
 
-  //       //setTimeout(document.getElementById('tablero').append(pieza), 2000);
-  //       if (r === filas - 1 && c === columnas - 1) {
-  //         piezaFuera = document.querySelector('.img-pieza-fuera');
-  //         piezaFuera = { ...pieza };
-  //         //piezaVacia = { ...pieza };
-  //         piezaFuera.src = '../images/0.jpg';
-  //         piezaFuera.id = 'vacia';
-  //         // piezaVacia.src = piezaFuera.src;
-  //         // piezaVacia.id = 'vacia';
-  //         // ultimaPieza.src = '../images/9.jpg';
-  //         // piezaFuera = pieza;
-  //         piezaFuera.src = '../images/9.jpg';
-  //         piezaFuera.id = '2-2';
-  //         document.getElementById('img-pieza-fuera').src = piezaFuera.src;
-  //         // debugger;
-  //       }
-  //       //      debugger;
-  //     }
-  //   }
-  //   document.getElementById('tablero').replaceWith(newGrid);
-
-  //   //  debugger;
-  //   // Renderizar boton y contadores
-  //   //    const newBoton = document.createElement('button');
-  //   const newBoton = document.querySelector('.btn-empezar');
-  //   //if (status === 'empezar') newBoton.textContent = 'Jugar';
-  //   //if (status === 'jugando') newBoton.textContent = 'Resetear';
-  //   //if (status === 'gano') newBoton.textContent = 'Jugar';
-  //   newBoton.addEventListener('click', () => {
-  //     clearInterval(this.ponerId);
-  //     this.ponerId = setInterval(this.tiempo, 1000);
-  //     //  this.setState(State.start());
-  //   });
-  //   document.querySelector('.btn-empezar').replaceWith(newBoton);
-  //   document.getElementById('movimientos').textContent = 'mov';
-  //   document.getElementById('tiempo').textContent = 'tim';
-  //   // mensaje cuando el puzzle es Completado
-  //   // status == 'gano';
-  //   debugger;
-  //   //if (status === 'gano') {
-  //   //  for (let i = 0; i < 1000; i++) {
-  //   //    document.querySelector('.mensaje-gano').textContent = '';
-  //   //    for (let t = 0; (t = 1000); t++) {
-  //   //      document.querySelector('.mensaje-gano').textContent =
-  //   //        '!!! Puzzle Completado ¡¡¡';
-  //   //    }
-  //   //  }
-  //   //  //      document.querySelector('.mensaje-gano').textContent =
-  //   //  //        '!!! Puzzle Completado ¡¡¡';
-  //   //} else {
-  //   //  document.querySelector('.mensaje-gano').textContent = '';
-  //   //}
-  // }
-
-  function reordenarTablero(actualImgNImg, actualImgNumOrdImg) {
-    //averiguo el numero indice de la imagen vacia
-    console.log('imgOrderRamdon antes de cambiar posiciones', imgOrderRamdon);
-    const index = imgOrderRamdon.indexOf('0');
-    console.log(index, parseInt(actualImgNumOrdImg));
-    imgOrderRamdon.splice(index, 1, actualImgNImg);
-    console.log(
-      'imgOrderRamdon despues de cambiar la posicion de la imagen actual a la vacia',
-      imgOrderRamdon,
-    );
-    imgOrderRamdon.splice(parseInt(actualImgNumOrdImg), 1, '0');
-    console.log(
-      'imgOrderRamdon despues de cambiar la posicion de la imagen vacia a la actual anterior',
-      imgOrderRamdon,
-    );
+    // //averiguo el numero indice de la imagen vacia
+    // console.log('imgOrderRamdon antes de cambiar posiciones', imgOrderRamdon);
+    // const index = imgOrderRamdon.indexOf('0');
+    // console.log(index, parseInt(actualImgNumOrdImg));
+    // imgOrderRamdon.splice(index, 1, actualImgNImg);
+    // console.log(
+    //   'imgOrderRamdon despues de cambiar la posicion de la imagen actual a la vacia',
+    //   imgOrderRamdon,
+    // );
+    // imgOrderRamdon.splice(parseInt(actualImgNumOrdImg), 1, '0');
+    // console.log(
+    //   'imgOrderRamdon despues de cambiar la posicion de la imagen vacia a la actual anterior',
+    //   imgOrderRamdon,
+    // );
     comprobarSiCompleto(imgOrderRamdon, imgOrderResultadoCorrecto);
     return imgOrderRamdon;
   }
@@ -435,7 +361,11 @@ function Juego(initialStateJuego) {
                 Tiempo: <span id="tiempo">0</span>
               </h3>
               <div className="empezar">
-                <button className="btn-empezar" type="button">
+                <button
+                  onClick={empezarJuego}
+                  className="btn-empezar"
+                  type="button"
+                >
                   Empezar
                 </button>
               </div>
@@ -467,6 +397,98 @@ function Juego(initialStateJuego) {
   );
 }
 export default Juego;
+
+//reordenar el Grid
+//let imgOrderRamdon = ['4', '2', '8', '5', '1', '6', '7', '0', '3'];
+// function renderizarJuego() {
+//   // const { grid, move, time, status } = this.stat
+//   // Redibujar el Grid-Tablero
+//   const newGrid = document.createElement('div');
+//   newGrid.className = 'grid-tablero';
+//   newGrid.id = 'tablero';
+//   let i = 0;
+//   for (let r = 0; r < filas; r++) {
+//     for (let c = 0; c < columnas; c++) {
+//       // Creando las piezas
+//       let pieza = document.createElement('img');
+//       pieza.id = r.toString() + '-' + c.toString(); // '0-0'...'2-2'
+//       pieza.src = '../images/' + imgOrderRamdon[i] + '.jpg';
+//       pieza.nImg = imgOrderRamdon[i];
+//       pieza.nOrdImg = i;
+//       //debugger;
+//       if (imgOrderRamdon[i] === '0') {
+//         piezaVacia = { ...pieza };
+//       }
+//       i++;
+//       // Creando los eventos del moviemiento de piezas
+//       // hacer click en una imagen para mover
+//       pieza.addEventListener('dragstart', dragStart);
+//       // mover una imagen mientras esta clikeada.
+//       pieza.addEventListener('dragover', dragOver);
+//       // dejar una imagen en otro lugar
+//       pieza.addEventListener('dragenter', dragEnter);
+//       // arrastrar la imagen a otra imagen
+//       pieza.addEventListener('dragleave', dragLeave);
+//       // arrastrar la imagen a otra imagen, suelta la imagen
+//       pieza.addEventListener('drop', dragDrop);
+//       // despues de arrastrar y soltar, intercambie los dos piezas
+//       pieza.addEventListener('dragend', dragEnd);
+//       //      debugger;
+//       newGrid.append(pieza);
+
+//       //setTimeout(document.getElementById('tablero').append(pieza), 2000);
+//       if (r === filas - 1 && c === columnas - 1) {
+//         piezaFuera = document.querySelector('.img-pieza-fuera');
+//         piezaFuera = { ...pieza };
+//         //piezaVacia = { ...pieza };
+//         piezaFuera.src = '../images/0.jpg';
+//         piezaFuera.id = 'vacia';
+//         // piezaVacia.src = piezaFuera.src;
+//         // piezaVacia.id = 'vacia';
+//         // ultimaPieza.src = '../images/9.jpg';
+//         // piezaFuera = pieza;
+//         piezaFuera.src = '../images/9.jpg';
+//         piezaFuera.id = '2-2';
+//         document.getElementById('img-pieza-fuera').src = piezaFuera.src;
+//         // debugger;
+//       }
+//       //      debugger;
+//     }
+//   }
+//   document.getElementById('tablero').replaceWith(newGrid);
+
+//   //  debugger;
+//   // Renderizar boton y contadores
+//   //    const newBoton = document.createElement('button');
+//   const newBoton = document.querySelector('.btn-empezar');
+//   //if (status === 'empezar') newBoton.textContent = 'Jugar';
+//   //if (status === 'jugando') newBoton.textContent = 'Resetear';
+//   //if (status === 'gano') newBoton.textContent = 'Jugar';
+//   newBoton.addEventListener('click', () => {
+//     clearInterval(this.ponerId);
+//     this.ponerId = setInterval(this.tiempo, 1000);
+//     //  this.setState(State.start());
+//   });
+//   document.querySelector('.btn-empezar').replaceWith(newBoton);
+//   document.getElementById('movimientos').textContent = 'mov';
+//   document.getElementById('tiempo').textContent = 'tim';
+//   // mensaje cuando el puzzle es Completado
+//   // status == 'gano';
+//   debugger;
+//   //if (status === 'gano') {
+//   //  for (let i = 0; i < 1000; i++) {
+//   //    document.querySelector('.mensaje-gano').textContent = '';
+//   //    for (let t = 0; (t = 1000); t++) {
+//   //      document.querySelector('.mensaje-gano').textContent =
+//   //        '!!! Puzzle Completado ¡¡¡';
+//   //    }
+//   //  }
+//   //  //      document.querySelector('.mensaje-gano').textContent =
+//   //  //        '!!! Puzzle Completado ¡¡¡';
+//   //} else {
+//   //  document.querySelector('.mensaje-gano').textContent = '';
+//   //}
+// }
 
 // const newBoton = document.querySelector('.btn-empezar');
 // if (status === 'empezar') newBoton.textContent = 'Jugar';

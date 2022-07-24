@@ -12,7 +12,8 @@ import piezaVacia from '../assets/0.jpg';
 
 // Se importa esta funcion para poder asceder al Store almacenado
 import { useSelector } from 'react-redux';
-import { imagenes } from './imagenes';
+import { getImagenes } from '../utils/imagenes';
+const imagenes = getImagenes();
 
 const niveles = [
   {
@@ -267,7 +268,7 @@ function Home({ initialState }) {
             id="imgAPI"
             onChange={() => callAPIGatitos()}
           />
-          <label for="imgAPI"> API de gatitos: </label>
+          <label for="imgAPI"> Imagenes de la API </label>
 
           <input
             type="radio"
