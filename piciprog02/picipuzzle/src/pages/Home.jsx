@@ -74,10 +74,9 @@ function init() {
     alto: 400,
     niveles,
     origenImagen: 'imgIncluidas',
-    imagenesGatitos: [],
+    imagenesAPI: [],
   };
 }
-console.log(imagenes[0]);
 function configJuegoReducer(state, action) {
   let columnas = 3;
   let filas = 4;
@@ -117,7 +116,7 @@ function configJuegoReducer(state, action) {
     case 'imagenAPI':
       return {
         ...state,
-        imagenesGatitos: action.payload,
+        imagenesAPI: action.payload,
         imageURL: action.payload[0].url,
       };
 
@@ -260,7 +259,7 @@ function Home({ initialState }) {
             defaultChecked
             onChange={() => dispatch({ type: 'imgIncluidas' })}
           />
-          <label for="imgIncluidas"> Imagenes incluidas </label>
+          <label htmlFor="imgIncluidas"> Imagenes incluidas </label>
 
           <input
             type="radio"
@@ -268,7 +267,7 @@ function Home({ initialState }) {
             id="imgAPI"
             onChange={() => callAPIGatitos()}
           />
-          <label for="imgAPI"> Imagenes de la API </label>
+          <label htmlFor="imgAPI"> API de gatitos: </label>
 
           <input
             type="radio"
@@ -276,7 +275,7 @@ function Home({ initialState }) {
             id="imgGaleria"
             onChange={() => dispatch({ type: 'imgGaleria' })}
           />
-          <label for="imgGaleria"> De tus Galeria </label>
+          <label htmlFor="imgGaleria"> De tus Galeria </label>
 
           <div
             className="cuadro-carga-imagen"
@@ -288,17 +287,17 @@ function Home({ initialState }) {
                 state.origenImagen === 'imgIncluidas' ? 'elegido' : ''
               }`}
             >
-              <label for="img-incluida">
+              <label htmlFor="img-incluida">
                 Elige la imagen con la que quieres jugar:{' '}
               </label>
               <select
                 name="img-incluida"
                 id="img-incluida"
                 onChange={(e) => changeSelectedImg(e)}
+                defaultValue={0}
               >
                 {state.imagenes.map((img, index) => (
                   <option
-                    selected={state.imageURL === img.url}
                     name="img-incluida"
                     value={index}
                     key={img.url}
@@ -327,18 +326,18 @@ function Home({ initialState }) {
           {/*************** Elección del nivel de juego ***************************/}
           <div className="elige-nivel">
             <form>
-              <label for="nivel">Elige el nivel al que quieres jugar: </label>
+              <label htmlFor="nivel">Elige el nivel al que quieres jugar: </label>
               <select
                 name="nivel"
                 id="nivel"
                 onChange={(e) => changeSelectedNivel(e)}
+                defaultValue={'n1'}
               >
-                {state.niveles.map((nivel) => (
+                {state.niveles.map((nivel, index) => (
                   <option
-                    selected={nivel.seleccionado}
                     name="nivel"
                     value={nivel.value}
-                    key={nivel.totalPiezas}
+                    key={index + "-" + nivel.totalPiezas}
                   >
                     {nivel.name}
                   </option>
@@ -361,7 +360,7 @@ function Home({ initialState }) {
 
           <div className="div-vertical-apaisada">
             <div className="div-vertical">
-              <label for="vertical-apaisada"> Vertical </label>
+              <label htmlFor="vertical-apaisada"> Vertical </label>
               <input
                 type="radio"
                 name="vertical-apaisada"
@@ -372,7 +371,7 @@ function Home({ initialState }) {
               />
             </div>
             <div className="div-apaisada">
-              <label for="vertical-apaisada"> Apaisada </label>
+              <label htmlFor="vertical-apaisada"> Apaisada </label>
               <input
                 type="radio"
                 name="vertical-apaisada"
@@ -412,7 +411,7 @@ function Home({ initialState }) {
             </button>
           </div>
           <div className="grid-imgAPI">
-            {state.imagenesGatitos.map((img) => (
+            {state.imagenesAPI.map((img) => (
               <img
                 onClick={() =>
                   dispatch({
