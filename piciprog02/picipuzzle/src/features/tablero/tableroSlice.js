@@ -1,48 +1,85 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  countries: [],
-  countriesToRender: [],
-  error: null,
-  search: '',
-  region: 'All',
+  imageURL: imagenes[0].url,
+  imagenes,
+  apaisada: false,
+  nivelSeleccionado: niveles[0],
+  niveles,
+  sourceImagen: 'imgIncluidas',
 };
 
-export const countriesSlice = createSlice({
-  name: 'countries',
+export const configJuegoSlice = createSlice({
+  name: 'configJuego',
   initialState,
-  // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
-    setCountriesFromData: (state, action) => {
-      state.countries = action.payload;
-      state.countriesToRender = action.payload;
+    // ********** eleccion de la fuente de la imagen ***********
+    imgIncluidas: (state) => {
+      state.sourceImagen = 'imgIncluidas';
     },
-    setError: (state) => {
-      state.error = true;
+    imgAPI: (state) => {
+      state.sourceImagen = 'imgAPI';
     },
-    setRegion: (state, action) => {
-      state.region = action.payload;
+    imgGaleria: (state) => {
+      state.sourceImagen = 'imgGaleria';
     },
-    setCountriesToRender: (state, action) => {
-      state.countriesToRender = action.payload;
+
+    // ********** eleccion de la fuente de la imagen ***********
+    incluidasImagen1: (state) => {
+      state.sourceImagen = 'incluidasImagen1';
     },
-    setSearch: (state, action) => {
-      state.search = action.paylaod;
+    incluidasImagen2: (state) => {
+      state.sourceImagen = 'incluidasImagen2';
+    },
+    incluidasImagen3: (state) => {
+      state.sourceImagen = 'incluidasImagen3';
+    },
+    incluidasImagen4: (state) => {
+      state.sourceImagen = 'incluidasImagen4';
+    },
+    incluidasImagen5: (state) => {
+      state.sourceImagen = 'incluidasImagen5';
+    },
+    incluidasImagen6: (state) => {
+      state.sourceImagen = 'incluidasImagen6';
+    },
+    incluidasImagen7: (state) => {
+      state.sourceImagen = 'incluidasImagen7';
+    },
+    incluidasImagen8: (state) => {
+      state.sourceImagen = 'incluidasImagen8';
+    },
+    incluidasImagen9: (state) => {
+      state.sourceImagen = 'incluidasImagen9';
+    },
+
+    // ************ imagenes de la galeria del usuario **********
+    imagenGaleria: (state) => {
+      state.sourceImagen = 'imagenGaleria';
+    },
+
+    // ************** imagenes vertical/apaisado ****************
+    apaisada: (state) => {
+      document.querySelector('.foto').id = 'apaisada';
+      state.sourceImagen = 'apaisada';
     },
   },
 });
 
-export const {
-  setCountriesFromData,
-  setError,
-  setRegion,
-  setCountriesToRender,
-  setSearch,
-} = countriesSlice.actions;
+export const { increment, decrement, incrementByAmount } = counterSlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
-export const selectCountries = (state) => state.countries;
+export const selectCount = (state) => state.counter.value;
 
-export default countriesSlice.reducer;
+// We can also write thunks by hand, which may contain both sync and async logic.
+// Here's an example of conditionally dispatching actions based on current state.
+export const incrementIfOdd = (amount) => (dispatch, getState) => {
+  const currentValue = selectCount(getState());
+  if (currentValue % 2 === 1) {
+    dispatch(incrementByAmount(amount));
+  }
+};
+
+export default counterSlice.reducer;

@@ -1,16 +1,14 @@
-import logo from './logo-pici130x177t.png';
 import '../styles/index.css';
 import React, { useReducer } from 'react';
-import iconFacebook from '../assets/icon-facebook.svg';
-import iconTwitter from '../assets/icon-twitter.svg';
-import iconInstagram from '../assets/icon-instagram.svg';
-import iconEmail from '../assets/icon-email.png';
+import styled from 'styled-components';
 import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 
 /***************  Carga de imagenes predeterminadas ************/
 
+import piezaFuera from '../assets/0.jpg';
 import img1 from '../assets/imagen01.jpg';
 import img2 from '../assets/imagen02.jpg';
 import img3 from '../assets/imagen03.jpg';
@@ -20,6 +18,8 @@ import img6 from '../assets/imagen06.jpg';
 import img7 from '../assets/imagen07.jpg';
 import img8 from '../assets/imagen08.jpg';
 import img9 from '../assets/imagen09.jpg';
+
+import { useSelector } from 'react-redux';
 
 const imagenes = [
   { url: img1, name: 'Imagen 1', value: 'incluidasImagen1' },
@@ -59,9 +59,30 @@ const niveles = [
     seleccionado: false,
   },
 ];
-
-//import styled from 'styled-components';
-//import { Helmet } from 'react-helmet';
+const EstiloButton = styled.button`
+  display: inline-block;
+  position: relative;
+  align-content: center;
+  background-color: yellow;
+  text-align: center;
+  border-radius: 5px;
+  padding: 0.3em;
+  margin: 0 auto;
+  width: 6rem;
+  border: 2px solid;
+  .link {
+    font-size: 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: black;
+  }
+`;
+let columnas = 3;
+let filas = 4;
+let alto = 400;
+let ancho = 300;
+let nivelSeleccionado = 'n1';
+let apaisada = false;
 
 //init();
 function init() {
@@ -69,22 +90,35 @@ function init() {
     imageURL: imagenes[0].url,
     imagenes,
     apaisada: false,
-    nivelSeleccionado: niveles[0],
+    nivelSeleccionado: 'n1',
     niveles,
     sourceImagen: 'imgIncluidas',
+    imagenesGatitos: [],
   };
 }
 console.log({ img1 });
 function configJuegoReducer(state, action) {
-  debugger;
   switch (action.type) {
     // ********** eleccion de la fuente de la imagen ***********
     case 'imgIncluidas':
-      return { ...state, sourceImagen: 'imgIncluidas' };
+      return {
+        ...state,
+        sourceImagen: 'imgIncluidas',
+        imageURL: imagenes[0].url,
+      };
     case 'imgAPI':
-      return { ...state, sourceImagen: 'imgAPI' };
+      return {
+        ...state,
+        sourceImagen: 'imgAPI',
+        imagenesGatitos: action.payload,
+        imageURL: imagenes[0].url,
+      };
     case 'imgGaleria':
-      return { ...state, sourceImagen: 'imgGaleria' };
+      return {
+        ...state,
+        sourceImagen: 'imgGaleria',
+        imageURL: imagenes[0].url,
+      };
 
     // ********** eleccion de la fuente de la imagen ***********
     case 'incluidasImagen1':
@@ -112,31 +146,58 @@ function configJuegoReducer(state, action) {
 
     // ************** imagenes vertical/apaisado *****************
     case 'apaisada':
-      document.querySelector('.foto').id = 'apaisada';
+      document.querySelector('.foto-elegida').id = 'apaisada';
+      ancho = 400;
+      alto = 300;
+
       return { ...state, apaisada: true };
     case 'apaisadaNo':
-      document.querySelector('.foto').id = 'apaisada-no';
+      document.querySelector('.foto-elegida').id = 'apaisada-no';
+      ancho = 300;
+      alto = 400;
+
       return { ...state, apaisada: false };
 
     // ************** eleccion del nivel de juego ***************
     case 'n1':
-      for (let i = 0; i < niveles.length; i++) {
+      if (state.apaisada) {
+        columnas = 4;
+        filas = 3;
+      } else {
+        columnas = 3;
+        filas = 4;
+      }
+      for (let i = 1; i < niveles.length; i++) {
         niveles[i].seleccionado = false;
       }
       niveles[0].seleccionado = true;
-      return { ...state, nivelSeleccionado: niveles[0] };
+      return { ...state, nivelSeleccionado: 'n1' };
     case 'n2':
+      if (state.apaisada) {
+        columnas = 6;
+        filas = 4;
+      } else {
+        columnas = 4;
+        filas = 6;
+      }
       for (let i = 0; i < niveles.length; i++) {
         niveles[i].seleccionado = false;
       }
       niveles[1].seleccionado = true;
-      return { ...state, nivelSeleccionado: niveles[1] };
+      return { ...state, nivelSeleccionado: 'n2' };
     case 'n3':
+      if (state.apaisada) {
+        columnas = 8;
+        filas = 6;
+      } else {
+        columnas = 6;
+        filas = 8;
+      }
       for (let i = 0; i < niveles.length; i++) {
         niveles[i].seleccionado = false;
       }
       niveles[2].seleccionado = true;
-      return { ...state, nivelSeleccionado: niveles[2] };
+      return { ...state, nivelSeleccionado: 'n3' };
 
     // ************** si el dispatch no tiene case *****************
     default:
@@ -144,14 +205,30 @@ function configJuegoReducer(state, action) {
   }
 }
 
+// later
+
 function Home({ initialState }) {
-  debugger;
   const [state, dispatch] = useReducer(configJuegoReducer, initialState, init);
+  // vamos a crear una variable objeto para almacenar todos los datos
+  // que nos interesan pasar a otra pagina
+  const store = useSelector((store) => store);
+
+  function callAPIGatitos() {
+    fetch(
+      'https://api.thecatapi.com/v1/images/search?limit=3&page=1&mime_types=jpg,png',
+    )
+      .then((res) => res.json())
+      .then((res) => {
+        dispatch({ type: 'imgAPI', payload: res });
+      });
+  }
+
   const changeSelectedImg = (e) => {
     dispatch({ type: e.target.value });
   };
   const changeSelectedNivel = (e) => {
     dispatch({ type: e.target.value });
+    store.nivelSeleccionado = e.target.value;
     console.log(e.target.value);
     console.log(e.target.select);
   };
@@ -167,7 +244,17 @@ function Home({ initialState }) {
     reader.readAsDataURL(file);
   }
   function irAlJuego() {
-    Link.to = './Juego.jsx';
+    store.nivelSeleccionado = state.nivelSeleccionado;
+    store.apaisada = state.apaisada;
+    store.ancho = ancho;
+    store.alto = alto;
+    store.columnas = columnas;
+    store.filas = filas;
+    store.imagen300x400 = state.imageURL;
+    store.piezaFuera = '../assets/0.jpg';
+    store.piezaVacia = '../assets/0.jpg';
+    console.log(store);
+    return;
   }
   return (
     <>
@@ -201,9 +288,9 @@ function Home({ initialState }) {
             type="radio"
             name="tipo-de-fuente-img"
             id="imgAPI"
-            onChange={() => dispatch({ type: 'imgAPI' })}
+            onChange={() => callAPIGatitos()}
           />
-          <label for="imgAPI"> De una API: </label>
+          <label for="imgAPI"> API de gatitos: </label>
 
           <input
             type="radio"
@@ -241,17 +328,6 @@ function Home({ initialState }) {
               </select>
             </div>
 
-            {/*************** selección de la imagen en la API *******************/}
-
-            <div
-              className={`elegir-source imgAPI ${
-                state.sourceImagen === 'imgAPI' ? 'elegido' : ''
-              }`}
-            >
-              <label for="api">Url de la API</label>
-              <input type="url" id="api" />
-            </div>
-
             {/*************** selección de la imagen en la Galeria *******************/}
 
             <div
@@ -267,6 +343,33 @@ function Home({ initialState }) {
               />
             </div>
           </div>
+          {/*************** Elección del nivel de juego ***************************/}
+          <div className="elige-nivel">
+            <form>
+              <label for="nivel">Elige el nivel al que quieres jugar: </label>
+              <select
+                name="nivel"
+                id="nivel"
+                onChange={(e) => changeSelectedNivel(e)}
+              >
+                {state.niveles.map((nivel) => (
+                  <option
+                    selected={nivel.seleccionado}
+                    name="nivel"
+                    value={nivel.value}
+                    key={nivel.totalPiezas}
+                  >
+                    {nivel.name}
+                  </option>
+                ))}
+              </select>
+            </form>
+          </div>
+          <EstiloButton>
+            <Link className="link" onClick={irAlJuego} to="/juego">
+              Jugar
+            </Link>
+          </EstiloButton>
 
           {/*************** selección formato de la imagen *******************/}
 
@@ -292,11 +395,9 @@ function Home({ initialState }) {
             </div>
           </div>
         </div>
-
         {/*************** presentacion de la imagen elegida ***************************/}
-
         <div className="marco-foto">
-          <div className="foto" id="apaisadaNo">
+          <div className="foto-elegida" id="apaisadaNo">
             <img
               className="img-foto"
               src={state.imageURL}
@@ -304,75 +405,47 @@ function Home({ initialState }) {
             />
           </div>
         </div>
-
-        {/*************** Elección del nivel de juego ***************************/}
-
-        <div className="elige-nivel">
-          <form>
-            <label for="nivel">Elige el nivel al que quieres jugar: </label>
-            <select
-              name="nivel"
-              id="nivel"
-              onChange={(e) => changeSelectedNivel(e)}
-            >
-              {state.niveles.map((nivel) => (
-                <option
-                  selected={nivel.seleccionado}
-                  name="nivel"
-                  value={nivel.value}
-                  key={nivel.totalPiezas}
-                >
-                  {nivel.name}
-                </option>
-              ))}
-            </select>
-          </form>
+        {/*************** selección de la imagen en la API *******************/}
+        <div
+          className={`elegir-source imgAPI ${
+            state.sourceImagen === 'imgAPI' ? 'elegido' : ''
+          }`}
+        >
+          <div className="api-buttons-y-notas">
+            <div className="notas">
+              <p>
+                Con el botón<span> Recargar </span>e irás repasando las imágenes
+                de la API de 3 en 3, cuando encuentres una que te gusta elígela
+                y luego en la presentación de la imagen has click para desplegar
+                el menu y guarda la imagen en una carpeta, luego la eliges desde
+                tu galería y a !!! jugar ¡¡¡.
+              </p>
+            </div>
+            <button className="btn-recargar-API" onClick={callAPIGatitos}>
+              Recargar
+            </button>
+            <button className="btn-recargar-API" onClick={callAPIGatitos}>
+              Recargar
+            </button>
+          </div>
+          <div className="grid-imgAPI">
+            {state.imagenesGatitos.map((img) => (
+              <img
+                onClick={() =>
+                  dispatch({
+                    type: 'imagenGaleria',
+                    payload: img.url,
+                  })
+                }
+                src={img.url}
+                alt=""
+                key={img.id}
+              />
+            ))}
+          </div>
         </div>
-
-        <button onClick={irAlJuego}>Jugar</button>
       </main>
-      <footer>
-        <div className="grid-container_footer">
-          <picture className="logo-footer">
-            <img src={logo} alt="Logo Pici" />
-          </picture>
-          <div className="icons-redes">
-            <a
-              href="https://es-es.facebook.com/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img src={iconFacebook} alt="Facebook" />
-            </a>
-            <a
-              href="https://www.instagram.com/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img src={iconInstagram} alt="Instagram" />
-            </a>
-          </div>
-          <p className="p_icons-contacto">Contacto:</p>
-          <div className="div-a-icons">
-            <a
-              href="mailto:picigui@hotmail.com"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img src={iconEmail} alt="Icon-mailto:picigui@hotmail.com" />
-            </a>
-            <a href="https://twitter.com/" target="_blank" rel="noreferrer">
-              <img src={iconTwitter} alt="Twitter" />
-            </a>
-          </div>
-          <div className="pie-footer">
-            <p className="attribution">
-              Desde Gran Canaria hecho con <span className="corazon">♥</span>{' '}
-              para el mundo.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }
