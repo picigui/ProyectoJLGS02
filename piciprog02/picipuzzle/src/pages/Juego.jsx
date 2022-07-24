@@ -8,6 +8,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
+import imagenVacia from '../assets/0.jpg';
 
 // valores que debo recibir de la pagina home
 // console.log(fotoElegida);
@@ -32,7 +33,6 @@ const EstiloButton = styled.button`
 // Valores iniciales para los reduce de esta pagina
 
 function init(initial) {
-  debugger;
   return {
     iniciado: false,
     apaisada: false,
@@ -42,9 +42,10 @@ function init(initial) {
     columnas: 3,
     filas: 4,
     imagen300x400: '../assets/imagen06.jpg',
-    piezaFuera: '../assets/0.jpg',
-    piezaVacia: '../assets/0.jpg',
+    piezaFuera: imagenVacia,
+    piezaVacia: imagenVacia,
     piezas: [],
+    piezasOrdenCorrecto: [],
     ...initial,
     //    ordenPiezas: arrayPiezas,
   };
@@ -53,9 +54,31 @@ function init(initial) {
 function juegoReducer(state, action) {
   switch (action.type) {
     case 'crearPiezas':
-      return { ...state, piezas: action.payload };
+      return {
+        ...state,
+        piezas: action.payload,
+        piezaVacia: action.payload[action.payload.length - 1],
+        piezasOrdenCorrecto: JSON.parse(JSON.stringify(action.payload)),
+      };
     case 'iniciado':
       return { ...state, iniciado: true };
+    case 'piezas':
+      return { ...state, piezas: action.payload };
+    case 'piezaFuera':
+      return { ...state, piezaFuera: action.payload.src };
+    case 'cambioPiezaVacia':
+      const estaOrdenado =
+        JSON.stringify(state.piezas.slice(0, state.piezas.length - 1)) ===
+        JSON.stringify(
+          state.piezasOrdenCorrecto.slice(
+            0,
+            state.piezasOrdenCorrecto.length - 1,
+          ),
+        );
+      if (estaOrdenado) {
+        alert('Ganaste');
+      }
+      return { ...state, piezaVacia: state.piezas[action.payload] };
     // ************** si el dispatch no tiene case *****************
     default:
       throw new Error();
@@ -90,9 +113,7 @@ function Juego(initialStateJuego) {
 
   //debugger;
   function crearPiezasCanvas() {
-    debugger;
     let arrayPiezas = [];
-    let i = 0;
     let piezaCanvas = document.createElement('canvas');
     const imagen300x400 = document.querySelector('.img-foto');
     for (let r = 0; r < state.filas; r++) {
@@ -110,35 +131,13 @@ function Juego(initialStateJuego) {
         // Creando las piezas imagenes
         const dataURL = piezaCanvas.toDataURL();
         arrayPiezas.push({
-          id: `img${r.toString()}-${c.toString()}`,
+          id: `${r.toString()}-${c.toString()}`,
           src: dataURL,
-          nImg: i + 1,
-          nOrdImg: i,
+          idTablero: `${r.toString()}-${c.toString()}`,
         });
-
-        // se inicia la variable con la colocacion correcta
-        imgOrderResultadoCorrecto[i] = i + 1;
-        imgOrderRamdon[i] = i + 1;
-        //debugger;
-        if (r === state.filas - 1 && c === state.columnas - 1) {
-          //ultimaPieza = { ...arrayPiezas[i] };
-          // const piezaVacia = document.querySelector('.img-pieza-fuera');
-          // ctx.drawImage(piezaVacia, posW, posH, state.ancho, state.alto);
-          // const dataURL = piezaCanvas.toDataURL();
-          // piezaFuera = document.querySelector('.img-pieza-fuera');
-          // piezaFuera.src = dataURL;
-          // piezaFuera.id = 'vacia';
-          // piezaFuera.nImg = i + 1;
-          // piezaFuera.nOrdImg = i;
-          imgOrderRamdon[i] = 0;
-
-          debugger;
-        }
-        i++;
       }
     }
     dispatch({ type: 'crearPiezas', payload: arrayPiezas });
-    //  setPiezas(arrayPiezas);
   }
 
   // ****** Creando los eventos del movimiento de piezas *******
@@ -162,21 +161,18 @@ function Juego(initialStateJuego) {
   }
 
   // despues de arrastrar y soltar, intercambie los dos piezas
-  function dragEnd(e) {
+  function dragEnd(pieza) {
     //debugger;
-
-    if (piezaFuera.id === 'vacia') {
-      return;
-    }
     // Tomo nota de las coodenadas de la pieza pinchada.
-    let actualPieza = e.target;
-    let actualCoords = actualPieza.id.split('-'); // nos dará "0-0" --> ["0", "0"]
+    let actualPieza = pieza;
+    debugger;
+    let actualCoords = actualPieza.idTablero.split('-'); // nos dará "0-0" --> ["0", "0"]
     let r = parseInt(actualCoords[0]);
     let c = parseInt(actualCoords[1]);
 
     // Tomo nota de las coodenadas de la pieza vacia.
 
-    let vaciaCoords = piezaVacia.id.split('-'); // nos dará "0-0" --> ["0", "0"]
+    let vaciaCoords = state.piezaVacia.idTablero.split('-'); // nos dará "0-0" --> ["0", "0"]
     let r2 = parseInt(vaciaCoords[0]);
     let c2 = parseInt(vaciaCoords[1]);
 
@@ -187,85 +183,56 @@ function Juego(initialStateJuego) {
     let moveDown = c === c2 && r2 === r + 1;
 
     let isAdjacent = moveLeft || moveRight || moveUp || moveDown;
-    debugger;
     if (isAdjacent) {
-      //let piezaA = { ...actualPieza };
-      //.grid-flex-box:nth-child(5)
-      let actualImg = actualPieza.src;
-      let actualImgId = actualPieza.id;
-      let actualImgNImg = actualPieza.nImg;
-      let actualImgNumOrdImg = actualPieza.nOrdImg;
-      //let piezaB = { ...piezaVacia };
-      let imagenVacia = piezaVacia.src;
-      let imagenVaciaId = piezaVacia.id;
-      //let imagenVaciaNImg = piezaVacia.nImg;
-      let imagenVaciaOrdImg = piezaVacia.nOrdImg;
-      //
-      //actualPieza = { ...piezaB };
-      //piezaVacia = { ...piezaA };
-      actualPieza = document.getElementById(`${imagenVaciaId}`);
-      actualPieza.src = imagenVacia;
-      actualPieza.id = imagenVaciaId;
-      actualPieza.nOrdImg = imagenVaciaOrdImg;
-      //  actualPieza.nImg = imagenVaciaNImg;
-      piezaVacia = document.getElementById(`${actualImgId}`);
-      piezaVacia.src = actualImg;
-      piezaVacia.id = actualImgId;
-      piezaVacia.nOrdImg = actualImgNumOrdImg;
-      piezaVacia.nImg = '0';
-      reordenarTablero(actualImgNImg, actualImgNumOrdImg);
+      const copia = state.piezaVacia;
+      const indexPiezaVacia = state.piezas.findIndex(
+        (p) => p.id === state.piezaVacia.id,
+      );
+      const indexPiezaActual = state.piezas.findIndex(
+        (p) => p.id === actualPieza.id,
+      );
+      const nuevasPiezas = [...state.piezas];
+      nuevasPiezas[indexPiezaActual] = copia;
+      nuevasPiezas[indexPiezaVacia] = state.piezas[indexPiezaActual];
+      const idsEnOrden = state.piezasOrdenCorrecto.map((p) => p.id);
+      nuevasPiezas.forEach((p, index) => (p.idTablero = idsEnOrden[index]));
+      dispatch({ type: 'piezas', payload: nuevasPiezas });
+      dispatch({ type: 'cambioPiezaVacia', payload: indexPiezaActual });
     }
-    //debugger;
-    //renderizarJuego();
   }
 
-  function empezarJuego(actualImgNImg, actualImgNumOrdImg) {
-    imgOrderRamdon = [...imgOrderResultadoCorrecto];
-    imgOrderRamdon[imgOrderRamdon.length - 1] = 0;
-    piezaFuera = state.Piezas[imgOrderRamdon.length - 1];
-    // Returns a random integer from 0 to 10:
-    Math.floor(Math.random() * 11);
-    // let ultimaPieza = { ...arrayPiezas[i] };
-    // ctx.drawImage(ultimaPieza, posW, posH, state.ancho, state.alto);
-    // const dataURL = piezaCanvas.toDataURL();
-    // piezaFuera = document.querySelector('.img-pieza-fuera');
-    // piezaFuera.src = dataURL;
-    // piezaFuera.id = 'vacia';
-    // piezaFuera.nImg = i + 1;
-    // piezaFuera.nOrdImg = i;
-    // imgOrderRamdon[i] = 0;
-
-    // //averiguo el numero indice de la imagen vacia
-    // console.log('imgOrderRamdon antes de cambiar posiciones', imgOrderRamdon);
-    // const index = imgOrderRamdon.indexOf('0');
-    // console.log(index, parseInt(actualImgNumOrdImg));
-    // imgOrderRamdon.splice(index, 1, actualImgNImg);
-    // console.log(
-    //   'imgOrderRamdon despues de cambiar la posicion de la imagen actual a la vacia',
-    //   imgOrderRamdon,
-    // );
-    // imgOrderRamdon.splice(parseInt(actualImgNumOrdImg), 1, '0');
-    // console.log(
-    //   'imgOrderRamdon despues de cambiar la posicion de la imagen vacia a la actual anterior',
-    //   imgOrderRamdon,
-    // );
-    comprobarSiCompleto(imgOrderRamdon, imgOrderResultadoCorrecto);
-    return imgOrderRamdon;
+  function empezarJuego() {
+    const copia = JSON.parse(JSON.stringify(state.piezasOrdenCorrecto));
+    const idsEnOrden = copia.map((p) => p.id);
+    const ultimaPieza = copia.pop();
+    dispatch({
+      type: 'piezaFuera',
+      payload: JSON.parse(JSON.stringify(ultimaPieza)),
+    });
+    shuffle(copia);
+    copia.push(ultimaPieza);
+    debugger;
+    idsEnOrden.forEach((id, index) => (copia[index].idTablero = id));
+    copia[copia.length - 1].src = imagenVacia;
+    dispatch({ type: 'piezas', payload: copia });
+    dispatch({ type: 'cambioPiezaVacia', payload: copia.length - 1 });
   }
 
-  function comprobarSiCompleto(imgOrderRamdon, imgOrderResultadoCorrecto) {
-    for (let i = 0; i < state.filas * state.columnas - 2; i++) {
-      debugger;
-      if (imgOrderRamdon[i] !== imgOrderResultadoCorrecto[i]) {
-        siCompleto = false;
-        console.log(siCompleto);
-        return siCompleto;
-      }
-      siCompleto = true;
+  function shuffle(array) {
+    let currentIndex = array.length,
+      randomIndex;
+    // While there remain elements to shuffle.
+    while (currentIndex != 0) {
+      // Pick a remaining element.
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      // And swap it with the current element.
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex],
+        array[currentIndex],
+      ];
     }
-
-    console.log(siCompleto);
-    return siCompleto;
+    return array;
   }
 
   return (
@@ -317,7 +284,7 @@ function Juego(initialStateJuego) {
                   onDragEnter={(e) => dragEnter(e)}
                   onDragLeave={(e) => dragLeave(e)}
                   onDrop={(e) => dragDrop(e)}
-                  onDragEnd={(e) => dragEnd(e)}
+                  onDragEnd={(e) => dragEnd(img)}
                   src={img.src}
                   id={img.id}
                   key={img.id}
@@ -376,161 +343,3 @@ function Juego(initialStateJuego) {
   );
 }
 export default Juego;
-
-//reordenar el Grid
-//let imgOrderRamdon = ['4', '2', '8', '5', '1', '6', '7', '0', '3'];
-// function renderizarJuego() {
-//   // const { grid, move, time, status } = this.stat
-//   // Redibujar el Grid-Tablero
-//   const newGrid = document.createElement('div');
-//   newGrid.className = 'grid-tablero';
-//   newGrid.id = 'tablero';
-//   let i = 0;
-//   for (let r = 0; r < filas; r++) {
-//     for (let c = 0; c < columnas; c++) {
-//       // Creando las piezas
-//       let pieza = document.createElement('img');
-//       pieza.id = r.toString() + '-' + c.toString(); // '0-0'...'2-2'
-//       pieza.src = '../images/' + imgOrderRamdon[i] + '.jpg';
-//       pieza.nImg = imgOrderRamdon[i];
-//       pieza.nOrdImg = i;
-//       //debugger;
-//       if (imgOrderRamdon[i] === '0') {
-//         piezaVacia = { ...pieza };
-//       }
-//       i++;
-//       // Creando los eventos del moviemiento de piezas
-//       // hacer click en una imagen para mover
-//       pieza.addEventListener('dragstart', dragStart);
-//       // mover una imagen mientras esta clikeada.
-//       pieza.addEventListener('dragover', dragOver);
-//       // dejar una imagen en otro lugar
-//       pieza.addEventListener('dragenter', dragEnter);
-//       // arrastrar la imagen a otra imagen
-//       pieza.addEventListener('dragleave', dragLeave);
-//       // arrastrar la imagen a otra imagen, suelta la imagen
-//       pieza.addEventListener('drop', dragDrop);
-//       // despues de arrastrar y soltar, intercambie los dos piezas
-//       pieza.addEventListener('dragend', dragEnd);
-//       //      debugger;
-//       newGrid.append(pieza);
-
-//       //setTimeout(document.getElementById('tablero').append(pieza), 2000);
-//       if (r === filas - 1 && c === columnas - 1) {
-//         piezaFuera = document.querySelector('.img-pieza-fuera');
-//         piezaFuera = { ...pieza };
-//         //piezaVacia = { ...pieza };
-//         piezaFuera.src = '../images/0.jpg';
-//         piezaFuera.id = 'vacia';
-//         // piezaVacia.src = piezaFuera.src;
-//         // piezaVacia.id = 'vacia';
-//         // ultimaPieza.src = '../images/9.jpg';
-//         // piezaFuera = pieza;
-//         piezaFuera.src = '../images/9.jpg';
-//         piezaFuera.id = '2-2';
-//         document.getElementById('img-pieza-fuera').src = piezaFuera.src;
-//         // debugger;
-//       }
-//       //      debugger;
-//     }
-//   }
-//   document.getElementById('tablero').replaceWith(newGrid);
-
-//   //  debugger;
-//   // Renderizar boton y contadores
-//   //    const newBoton = document.createElement('button');
-//   const newBoton = document.querySelector('.btn-empezar');
-//   //if (status === 'empezar') newBoton.textContent = 'Jugar';
-//   //if (status === 'jugando') newBoton.textContent = 'Resetear';
-//   //if (status === 'gano') newBoton.textContent = 'Jugar';
-//   newBoton.addEventListener('click', () => {
-//     clearInterval(this.ponerId);
-//     this.ponerId = setInterval(this.tiempo, 1000);
-//     //  this.setState(State.start());
-//   });
-//   document.querySelector('.btn-empezar').replaceWith(newBoton);
-//   document.getElementById('movimientos').textContent = 'mov';
-//   document.getElementById('tiempo').textContent = 'tim';
-//   // mensaje cuando el puzzle es Completado
-//   // status == 'gano';
-//   debugger;
-//   //if (status === 'gano') {
-//   //  for (let i = 0; i < 1000; i++) {
-//   //    document.querySelector('.mensaje-gano').textContent = '';
-//   //    for (let t = 0; (t = 1000); t++) {
-//   //      document.querySelector('.mensaje-gano').textContent =
-//   //        '!!! Puzzle Completado ¡¡¡';
-//   //    }
-//   //  }
-//   //  //      document.querySelector('.mensaje-gano').textContent =
-//   //  //        '!!! Puzzle Completado ¡¡¡';
-//   //} else {
-//   //  document.querySelector('.mensaje-gano').textContent = '';
-//   //}
-// }
-
-// const newBoton = document.querySelector('.btn-empezar');
-// if (status === 'empezar') newBoton.textContent = 'Jugar';
-// if (status === 'jugando') newBoton.textContent = 'Resetear';
-// if (status === 'gano') newBoton.textContent = 'Jugar';
-// newBoton.addEventListener('click', () => {
-//   clearInterval(this.ponerId);
-//   this.ponerId = setInterval(this.tiempo, 1000);
-//   this.setState(State.start());
-// });
-// document.querySelector('.btn-empezar').replaceWith(newBoton);
-
-// document.getElementById('movimientos').textContent = move;
-
-// document.getElementById('tiempo').textContent = time;
-
-// mensaje cuando el puzzle es Completado
-// status == 'gano';
-// debugger;
-// if (status === 'gano') {
-//   for (let i = 0; i < 1000; i++) {
-//     document.querySelector('.mensaje-gano').textContent = '';
-//     for (let t = 0; (t = 1000); t++) {}
-//     document.querySelector('.mensaje-gano').textContent =
-//       '!!! Puzzle Completado ¡¡¡';
-//   }
-//
-//   //      document.querySelector('.mensaje-gano').textContent =
-//   //        '!!! Puzzle Completado ¡¡¡';
-// } else {
-//   document.querySelector('.mensaje-gano').textContent = '';
-// }
-
-// // ********** Cambio de la imagen elegida ***********
-// case 'apaisada':
-//   ancho = 400;
-//   alto = 300;
-//   if (state.nivelSeleccionado === 'n1') {
-//     columnas = 4;
-//     filas = 3;
-//   }
-//   if (state.nivelSeleccionado === 'n2') {
-//     columnas = 6;
-//     filas = 4;
-//   }
-//   if (state.nivelSeleccionado === 'n3') {
-//     columnas = 8;
-//     filas = 6;
-//   }
-//   return { ...state, columnas, filas, ancho, alto };
-// case 'apaisadaNo':
-//   ancho = 300;
-//   alto = 400;
-//   if (state.nivelSeleccionado === 'n1') {
-//     columnas = 3;
-//     filas = 4;
-//   }
-//   if (state.nivelSeleccionado === 'n2') {
-//     columnas = 4;
-//     filas = 6;
-//   }
-//   if (state.nivelSeleccionado === 'n3') {
-//     columnas = 6;
-//     filas = 8;
-//   }
-//   return { ...state, columnas, filas, ancho, alto };
