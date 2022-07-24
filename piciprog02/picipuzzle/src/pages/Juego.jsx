@@ -92,14 +92,6 @@ function Juego(initialStateJuego) {
   const [state, dispatch] = useReducer(juegoReducer, store, init);
   //const [pieza, setPiezas] = useState([]);
 
-  let piezaVacia;
-  let piezaFuera;
-  let siCompleto = false;
-
-  let imgOrderResultadoCorrecto = [];
-  //let imgOrder = [4, 2, 8, 5, 1, 10, 6, 7, 0, 3, 9, 11];
-  let imgOrderRamdon = [];
-
   useEffect(() => {
     if (state.iniciado === false) {
       dispatch({ type: 'iniciado' });
@@ -155,9 +147,7 @@ function Juego(initialStateJuego) {
   }
   // arrastrar la imagen a otra imagen, suelta la imagen
   function dragDrop(e) {
-    if (e.nImg === '0') {
-      piezaVacia = e;
-    } // esto se refiere a la pieza que se coloca encima
+    e.preventDefault();
   }
 
   // despues de arrastrar y soltar, intercambie los dos piezas
@@ -222,7 +212,7 @@ function Juego(initialStateJuego) {
     let currentIndex = array.length,
       randomIndex;
     // While there remain elements to shuffle.
-    while (currentIndex != 0) {
+    while (currentIndex !== 0) {
       // Pick a remaining element.
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex--;
