@@ -6,9 +6,7 @@ import { Link } from 'react-router-dom';
 import '../styles/juego.css';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
-import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import piezaFuera from '../assets/0.jpg';
 import { useEffect } from 'react';
 
 // valores que debo recibir de la pagina home
@@ -55,10 +53,7 @@ function init(initial) {
 function juegoReducer(state, action) {
   switch (action.type) {
     case 'crearPiezas':
-      return {
-        ...state,
-        piezas: action.payload,
-      };
+      return { ...state, piezas: action.payload };
     case 'iniciado':
       return { ...state, iniciado: true };
     // ************** si el dispatch no tiene case *****************
@@ -82,9 +77,6 @@ function Juego(initialStateJuego) {
   //let imgOrder = [4, 2, 8, 5, 1, 10, 6, 7, 0, 3, 9, 11];
   let imgOrderRamdon = [];
 
-  let actualPieza;
-  let ultimaPieza;
-
   useEffect(() => {
     if (state.iniciado === false) {
       dispatch({ type: 'iniciado' });
@@ -94,7 +86,8 @@ function Juego(initialStateJuego) {
       // }, 200);
       crearPiezasCanvas();
     }
-  }, []);
+  });
+
   //debugger;
   function crearPiezasCanvas() {
     debugger;
@@ -128,7 +121,7 @@ function Juego(initialStateJuego) {
         imgOrderRamdon[i] = i + 1;
         //debugger;
         if (r === state.filas - 1 && c === state.columnas - 1) {
-          ultimaPieza = { ...arrayPiezas[i] };
+          //ultimaPieza = { ...arrayPiezas[i] };
           // const piezaVacia = document.querySelector('.img-pieza-fuera');
           // ctx.drawImage(piezaVacia, posW, posH, state.ancho, state.alto);
           // const dataURL = piezaCanvas.toDataURL();
@@ -148,12 +141,7 @@ function Juego(initialStateJuego) {
     //  setPiezas(arrayPiezas);
   }
 
-  // ****** Creando los eventos del moviemiento de piezas *******
-  // hacer click en una imagen para mover
-  function dragStart() {
-    //  debugger;
-    actualPieza = this;
-  }
+  // ****** Creando los eventos del movimiento de piezas *******
   // mover una imagen mientras esta clikeada.
   function dragOver(e) {
     e.preventDefault();
@@ -168,7 +156,6 @@ function Juego(initialStateJuego) {
   }
   // arrastrar la imagen a otra imagen, suelta la imagen
   function dragDrop(e) {
-    console.log(e.nImg);
     if (e.nImg === '0') {
       piezaVacia = e;
     } // esto se refiere a la pieza que se coloca encima
@@ -182,7 +169,7 @@ function Juego(initialStateJuego) {
       return;
     }
     // Tomo nota de las coodenadas de la pieza pinchada.
-    const actualPieza = e.target;
+    let actualPieza = e.target;
     let actualCoords = actualPieza.id.split('-'); // nos dará "0-0" --> ["0", "0"]
     let r = parseInt(actualCoords[0]);
     let c = parseInt(actualCoords[1]);
@@ -226,13 +213,7 @@ function Juego(initialStateJuego) {
       piezaVacia.id = actualImgId;
       piezaVacia.nOrdImg = actualImgNumOrdImg;
       piezaVacia.nImg = '0';
-      // reordenarTablero(actualImgNImg, actualImgNumOrdImg);
-      console.log(
-        'actualImgNImg',
-        actualImgNImg,
-        'actualImgNumOrdImg',
-        actualImgNumOrdImg,
-      );
+      reordenarTablero(actualImgNImg, actualImgNumOrdImg);
     }
     //debugger;
     //renderizarJuego();
@@ -332,7 +313,6 @@ function Juego(initialStateJuego) {
             {state.piezas.map((img, index) => {
               return (
                 <img
-                  onDragStart={(e) => dragStart(e)}
                   onDragOver={(e) => dragOver(e)}
                   onDragEnter={(e) => dragEnter(e)}
                   onDragLeave={(e) => dragLeave(e)}
@@ -376,7 +356,6 @@ function Juego(initialStateJuego) {
                 src={state.piezaFuera}
                 // id={piezaFuera.id}
                 alt="img-pieza-fuera"
-                onDragStart={(e) => dragStart(e)}
                 onDragOver={(e) => dragOver(e)}
                 onDragEnter={(e) => dragEnter(e)}
                 onDragLeave={(e) => dragLeave(e)}
