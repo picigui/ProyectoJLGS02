@@ -11,6 +11,8 @@ import ErrorPage from './pages/Error';
 const App = () => {
   return (
     <Provider store={store}>
+      {/* Esta orden de arriba es para que el redux nos conceda acceso
+      general al store desde cualquier pagina de la app. */}
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />

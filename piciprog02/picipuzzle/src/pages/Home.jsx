@@ -1,24 +1,16 @@
-import '../styles/index.css';
 import React, { useReducer } from 'react';
 import styled from 'styled-components';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import '../styles/index.css';
 
 /***************  Carga de imagenes predeterminadas ************/
 
-import piezaFuera from '../assets/0.jpg';
-import img1 from '../assets/imagen01.jpg';
-import img2 from '../assets/imagen02.jpg';
-import img3 from '../assets/imagen03.jpg';
-import img4 from '../assets/imagen04.jpg';
-import img5 from '../assets/imagen05.jpg';
-import img6 from '../assets/imagen06.jpg';
-import img7 from '../assets/imagen07.jpg';
-import img8 from '../assets/imagen08.jpg';
-import img9 from '../assets/imagen09.jpg';
+import piezaVacia from '../assets/0.jpg';
 
+// Se importa esta funcion para poder asceder al Store almacenado
 import { useSelector } from 'react-redux';
 import { imagenes } from './imagenes';
 
@@ -26,28 +18,26 @@ const niveles = [
   {
     name: 'Nivel 1 (12 piezas)',
     value: 'n1',
-    totalPiezas: 12,
-    numWPiezas: 3,
-    numHPiezas: 4,
+    columnas: 3,
+    filas: 4,
     seleccionado: true,
   },
   {
     name: 'Nivel 2 (24 piezas)',
     value: 'n2',
-    totalPiezas: 24,
-    numWPiezas: 4,
-    numHPiezas: 6,
+    columnas: 4,
+    filas: 6,
     seleccionado: false,
   },
   {
     name: 'Nivel 3 (48 piezas)',
     value: 'n3',
-    totalPiezas: 48,
-    numWPiezas: 6,
-    numHPiezas: 8,
+    columnas: 6,
+    filas: 8,
     seleccionado: false,
   },
 ];
+
 const EstiloButton = styled.button`
   display: inline-block;
   position: relative;
@@ -66,12 +56,9 @@ const EstiloButton = styled.button`
     color: black;
   }
 `;
-let columnas = 3;
-let filas = 4;
-let alto = 400;
-let ancho = 300;
-let nivelSeleccionado = 'n1';
-let apaisada = false;
+
+// let nivelSeleccionado = 'n1';
+// let apaisada = false;
 
 //init();
 function init() {
@@ -80,58 +67,58 @@ function init() {
     imagenes,
     apaisada: false,
     nivelSeleccionado: 'n1',
+    columnas: 3,
+    filas: 4,
+    ancho: 300,
+    alto: 400,
     niveles,
-    sourceImagen: 'imgIncluidas',
+    origenImagen: 'imgIncluidas',
     imagenesGatitos: [],
   };
 }
-console.log({ img1 });
+console.log(imagenes[0]);
 function configJuegoReducer(state, action) {
+  let columnas = 3;
+  let filas = 4;
+  let alto = 400;
+  let ancho = 300;
+
   switch (action.type) {
     // ********** eleccion de la fuente de la imagen ***********
     case 'imgIncluidas':
       return {
         ...state,
-        sourceImagen: 'imgIncluidas',
+        origenImagen: 'imgIncluidas',
         imageURL: imagenes[0].url,
       };
     case 'imgAPI':
       return {
         ...state,
-        sourceImagen: 'imgAPI',
-        imagenesGatitos: action.payload,
+        origenImagen: 'imgAPI',
         imageURL: imagenes[0].url,
       };
     case 'imgGaleria':
       return {
         ...state,
-        sourceImagen: 'imgGaleria',
+        origenImagen: 'imgGaleria',
         imageURL: imagenes[0].url,
       };
 
     // ********** eleccion de la fuente de la imagen ***********
-    case 'incluidasImagen1':
-      return { ...state, imageURL: imagenes[0].url };
-    case 'incluidasImagen2':
-      return { ...state, imageURL: imagenes[1].url };
-    case 'incluidasImagen3':
-      return { ...state, imageURL: imagenes[2].url };
-    case 'incluidasImagen4':
-      return { ...state, imageURL: imagenes[3].url };
-    case 'incluidasImagen5':
-      return { ...state, imageURL: imagenes[4].url };
-    case 'incluidasImagen6':
-      return { ...state, imageURL: imagenes[5].url };
-    case 'incluidasImagen7':
-      return { ...state, imageURL: imagenes[6].url };
-    case 'incluidasImagen8':
-      return { ...state, imageURL: imagenes[7].url };
-    case 'incluidasImagen9':
-      return { ...state, imageURL: imagenes[8].url };
+    case 'seleccionadaImagenIncluidas':
+      return { ...state, imageURL: imagenes[action.payload].url };
 
     // ************ imagenes de la galeria del usuario **********
     case 'imagenGaleria':
       return { ...state, imageURL: action.payload };
+
+    // ************ imagenes de la galeria del usuario **********
+    case 'imagenAPI':
+      return {
+        ...state,
+        imagenesGatitos: action.payload,
+        imageURL: action.payload[0].url,
+      };
 
     // ************** imagenes vertical/apaisado *****************
     case 'apaisada':
@@ -139,13 +126,13 @@ function configJuegoReducer(state, action) {
       ancho = 400;
       alto = 300;
 
-      return { ...state, apaisada: true };
+      return { ...state, ancho, alto, apaisada: true };
     case 'apaisadaNo':
       document.querySelector('.foto-elegida').id = 'apaisada-no';
       ancho = 300;
       alto = 400;
 
-      return { ...state, apaisada: false };
+      return { ...state, ancho, alto, apaisada: false };
 
     // ************** eleccion del nivel de juego ***************
     case 'n1':
@@ -160,7 +147,7 @@ function configJuegoReducer(state, action) {
         niveles[i].seleccionado = false;
       }
       niveles[0].seleccionado = true;
-      return { ...state, nivelSeleccionado: 'n1' };
+      return { ...state, niveles, columnas, filas, nivelSeleccionado: 'n1' };
     case 'n2':
       if (state.apaisada) {
         columnas = 6;
@@ -173,7 +160,8 @@ function configJuegoReducer(state, action) {
         niveles[i].seleccionado = false;
       }
       niveles[1].seleccionado = true;
-      return { ...state, nivelSeleccionado: 'n2' };
+      debugger;
+      return { ...state, niveles, columnas, filas, nivelSeleccionado: 'n2' };
     case 'n3':
       if (state.apaisada) {
         columnas = 8;
@@ -186,7 +174,7 @@ function configJuegoReducer(state, action) {
         niveles[i].seleccionado = false;
       }
       niveles[2].seleccionado = true;
-      return { ...state, nivelSeleccionado: 'n3' };
+      return { ...state, niveles, columnas, filas, nivelSeleccionado: 'n3' };
 
     // ************** si el dispatch no tiene case *****************
     default:
@@ -201,6 +189,7 @@ function Home({ initialState }) {
   // vamos a crear una variable objeto para almacenar todos los datos
   // que nos interesan pasar a otra pagina
   const store = useSelector((store) => store);
+  store.imageURL = imagenes[0].url;
 
   function callAPIGatitos() {
     fetch(
@@ -209,17 +198,16 @@ function Home({ initialState }) {
       .then((res) => res.json())
       .then((res) => {
         dispatch({ type: 'imgAPI', payload: res });
+        dispatch({ type: 'imagenAPI', payload: res });
       });
   }
 
   const changeSelectedImg = (e) => {
-    dispatch({ type: e.target.value });
+    dispatch({ type: 'seleccionadaImagenIncluidas', payload: e.target.value });
   };
   const changeSelectedNivel = (e) => {
     dispatch({ type: e.target.value });
     store.nivelSeleccionado = e.target.value;
-    console.log(e.target.value);
-    console.log(e.target.select);
   };
 
   function mostrarImagenElegida(event) {
@@ -235,13 +223,13 @@ function Home({ initialState }) {
   function irAlJuego() {
     store.nivelSeleccionado = state.nivelSeleccionado;
     store.apaisada = state.apaisada;
-    store.ancho = ancho;
-    store.alto = alto;
-    store.columnas = columnas;
-    store.filas = filas;
+    store.ancho = state.ancho;
+    store.alto = state.alto;
+    store.columnas = state.columnas;
+    store.filas = state.filas;
     store.imagen300x400 = state.imageURL;
-    store.piezaFuera = '../assets/0.jpg';
-    store.piezaVacia = '../assets/0.jpg';
+    store.piezaFuera = piezaVacia; //'../assets/0.jpg';
+    store.piezaVacia = piezaVacia; //'../assets/0.jpg';
     console.log(store);
     return;
   }
@@ -289,11 +277,14 @@ function Home({ initialState }) {
           />
           <label for="imgGaleria"> De tus Galeria </label>
 
-          <div className="cuadro-carga-imagen">
+          <div
+            className="cuadro-carga-imagen"
+            id={state.origenImagen === 'imgAPI' ? 'ocultar' : ''}
+          >
             {/********** selección de la imagen incluidas en la APP *************/}
             <div
               className={`elegir-source imgIncluidas ${
-                state.sourceImagen === 'imgIncluidas' ? 'elegido' : ''
+                state.origenImagen === 'imgIncluidas' ? 'elegido' : ''
               }`}
             >
               <label for="img-incluida">
@@ -304,11 +295,11 @@ function Home({ initialState }) {
                 id="img-incluida"
                 onChange={(e) => changeSelectedImg(e)}
               >
-                {state.imagenes.map((img) => (
+                {state.imagenes.map((img, index) => (
                   <option
                     selected={state.imageURL === img.url}
                     name="img-incluida"
-                    value={img.value}
+                    value={index}
                     key={img.url}
                   >
                     {img.name}
@@ -321,7 +312,7 @@ function Home({ initialState }) {
 
             <div
               className={`elegir-source imgGaleria ${
-                state.sourceImagen === 'imgGaleria' ? 'elegido' : ''
+                state.origenImagen === 'imgGaleria' ? 'elegido' : ''
               }`}
             >
               <input
@@ -354,8 +345,13 @@ function Home({ initialState }) {
               </select>
             </form>
           </div>
-          <EstiloButton>
-            <Link className="link" onClick={irAlJuego} to="/juego">
+          <EstiloButton id={state.origenImagen === 'imgAPI' ? 'ocultar' : ''}>
+            <Link
+              className="link"
+              id={state.origenImagen === 'imgAPI' ? 'ocultar' : ''}
+              onClick={irAlJuego}
+              to="/juego"
+            >
               Jugar
             </Link>
           </EstiloButton>
@@ -397,7 +393,7 @@ function Home({ initialState }) {
         {/*************** selección de la imagen en la API *******************/}
         <div
           className={`elegir-source imgAPI ${
-            state.sourceImagen === 'imgAPI' ? 'elegido' : ''
+            state.origenImagen === 'imgAPI' ? 'elegido' : ''
           }`}
         >
           <div className="api-buttons-y-notas">
@@ -410,9 +406,6 @@ function Home({ initialState }) {
                 tu galería y a !!! jugar ¡¡¡.
               </p>
             </div>
-            <button className="btn-recargar-API" onClick={callAPIGatitos}>
-              Recargar
-            </button>
             <button className="btn-recargar-API" onClick={callAPIGatitos}>
               Recargar
             </button>

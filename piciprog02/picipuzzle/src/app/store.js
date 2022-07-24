@@ -1,10 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-//import counterReducer from '../features/counter/counterSlice';
-//import countriesReducer from '../features/countries/countrySlice';
 
 export const store = configureStore({
   reducer: {
-    //    counter: counterReducer,
-    //    countries: countriesReducer,
+    // Esto es necesario crearlo y declararlo así, si se piensa
+    // trabajar con el store como almacen de variables, sin usar
+    // los ficheros Slices.
   },
 });

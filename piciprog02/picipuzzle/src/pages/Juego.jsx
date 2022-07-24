@@ -9,6 +9,7 @@ import { Footer } from '../components/Footer';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import piezaFuera from '../assets/0.jpg';
+import { useEffect } from 'react';
 
 // valores que debo recibir de la pagina home
 // console.log(fotoElegida);
@@ -32,17 +33,16 @@ const EstiloButton = styled.button`
 
 // Valores iniciales para los reduce de esta pagina
 
-let arrayPiezas = [];
 function init(initial) {
   debugger;
   return {
     iniciado: false,
     apaisada: false,
     nivelSeleccionado: 'n1',
-    filas: 3,
-    columnas: 3,
     ancho: 300,
     alto: 400,
+    columnas: 3,
+    filas: 4,
     imagen300x400: '../assets/imagen06.jpg',
     piezaFuera: '../assets/0.jpg',
     piezaVacia: '../assets/0.jpg',
@@ -51,33 +51,13 @@ function init(initial) {
     //    ordenPiezas: arrayPiezas,
   };
 }
-// const EstiloPiezaFuera = styled.div`
-//     border: 0.01px solid black;
-//     cursor: pointer;
-//     width: (state.ancho / state.columnas) px;
-//     height: (state.alto / state.filas) px;
-// `;
 
 function juegoReducer(state, action) {
   switch (action.type) {
     case 'crearPiezas':
-      return { ...state, pieza: arrayPiezas };
+      return { ...state, piezas: action.payload };
     case 'iniciado':
       return { ...state, iniciado: true };
-    // ************** imagenes vertical/apaisado *****************
-    case 'apaisada':
-      document.querySelector('.grid-ultima-pieza').id = 'grid-apaisado';
-      // ancho = 400;
-      // alto = 300;
-
-      return { ...state, apaisada: true };
-    case 'apaisadaNo':
-      document.querySelector('.grid-ultima-pieza').id = 'grid-apaisado-no';
-      // ancho = 300;
-      // alto = 400;
-
-      return { ...state, apaisada: false };
-
     // ************** si el dispatch no tiene case *****************
     default:
       throw new Error();
@@ -96,32 +76,26 @@ function Juego(initialStateJuego) {
   let siCompleto = false;
 
   let imgOrderResultadoCorrecto = [];
-  let imgOrder = [4, 2, 8, 5, 1, 10, 6, 7, 0, 3, 9, 11];
+  //let imgOrder = [4, 2, 8, 5, 1, 10, 6, 7, 0, 3, 9, 11];
+  let imgOrderRamdon = [];
 
   let actualPieza;
   let ultimaPieza;
 
-  start();
-
-  function start() {
-    if (state.apaisada === true) {
-      dispatch({ type: 'apaisada' });
-    }
-    if (state.apaisada === false) {
-      dispatch({ type: 'apaisadaNo' });
-    }
-
+  useEffect(() => {
     if (state.iniciado === false) {
       dispatch({ type: 'iniciado' });
       state.iniciado = true;
-      setTimeout(() => {
-        crearPiezasCanvas();
-      }, 200);
+      // setTimeout(() => {
+      //   crearPiezasCanvas();
+      // }, 200);
+      crearPiezasCanvas();
     }
-  }
-
+  }, []);
   //debugger;
   function crearPiezasCanvas() {
+    debugger;
+    let arrayPiezas = [];
     let i = 0;
     let piezaCanvas = document.createElement('canvas');
     const imagen300x400 = document.querySelector('.img-foto');
@@ -148,6 +122,7 @@ function Juego(initialStateJuego) {
 
         // se inicia la variable con la colocacion correcta
         imgOrderResultadoCorrecto[i] = i + 1;
+        imgOrderRamdon[i] = i + 1;
         //debugger;
         if (r === state.filas - 1 && c === state.columnas - 1) {
           ultimaPieza = { ...arrayPiezas[i] };
@@ -159,13 +134,14 @@ function Juego(initialStateJuego) {
           piezaFuera.id = 'vacia';
           piezaFuera.nImg = i + 1;
           piezaFuera.nOrdImg = i;
+          imgOrderRamdon[i] = 0;
 
           debugger;
         }
         i++;
       }
     }
-    dispatch({ type: 'crearPiezas' });
+    dispatch({ type: 'crearPiezas', payload: arrayPiezas });
     //  setPiezas(arrayPiezas);
   }
 
@@ -260,7 +236,7 @@ function Juego(initialStateJuego) {
   }
 
   //reordenar el Grid
-  //let imgOrder = ['4', '2', '8', '5', '1', '6', '7', '0', '3'];
+  //let imgOrderRamdon = ['4', '2', '8', '5', '1', '6', '7', '0', '3'];
   // function renderizarJuego() {
   //   // const { grid, move, time, status } = this.stat
   //   // Redibujar el Grid-Tablero
@@ -273,11 +249,11 @@ function Juego(initialStateJuego) {
   //       // Creando las piezas
   //       let pieza = document.createElement('img');
   //       pieza.id = r.toString() + '-' + c.toString(); // '0-0'...'2-2'
-  //       pieza.src = '../images/' + imgOrder[i] + '.jpg';
-  //       pieza.nImg = imgOrder[i];
+  //       pieza.src = '../images/' + imgOrderRamdon[i] + '.jpg';
+  //       pieza.nImg = imgOrderRamdon[i];
   //       pieza.nOrdImg = i;
   //       //debugger;
-  //       if (imgOrder[i] === '0') {
+  //       if (imgOrderRamdon[i] === '0') {
   //         piezaVacia = { ...pieza };
   //       }
   //       i++;
@@ -353,27 +329,27 @@ function Juego(initialStateJuego) {
 
   function reordenarTablero(actualImgNImg, actualImgNumOrdImg) {
     //averiguo el numero indice de la imagen vacia
-    console.log('imgOrder antes de cambiar posiciones', imgOrder);
-    const index = imgOrder.indexOf('0');
+    console.log('imgOrderRamdon antes de cambiar posiciones', imgOrderRamdon);
+    const index = imgOrderRamdon.indexOf('0');
     console.log(index, parseInt(actualImgNumOrdImg));
-    imgOrder.splice(index, 1, actualImgNImg);
+    imgOrderRamdon.splice(index, 1, actualImgNImg);
     console.log(
-      'imgOrder despues de cambiar la posicion de la imagen actual a la vacia',
-      imgOrder,
+      'imgOrderRamdon despues de cambiar la posicion de la imagen actual a la vacia',
+      imgOrderRamdon,
     );
-    imgOrder.splice(parseInt(actualImgNumOrdImg), 1, '0');
+    imgOrderRamdon.splice(parseInt(actualImgNumOrdImg), 1, '0');
     console.log(
-      'imgOrder despues de cambiar la posicion de la imagen vacia a la actual anterior',
-      imgOrder,
+      'imgOrderRamdon despues de cambiar la posicion de la imagen vacia a la actual anterior',
+      imgOrderRamdon,
     );
-    comprobarSiCompleto(imgOrder, imgOrderResultadoCorrecto);
-    return imgOrder;
+    comprobarSiCompleto(imgOrderRamdon, imgOrderResultadoCorrecto);
+    return imgOrderRamdon;
   }
 
-  function comprobarSiCompleto(imgOrder, imgOrderResultadoCorrecto) {
+  function comprobarSiCompleto(imgOrderRamdon, imgOrderResultadoCorrecto) {
     for (let i = 0; i < state.filas * state.columnas - 2; i++) {
       debugger;
-      if (imgOrder[i] !== imgOrderResultadoCorrecto[i]) {
+      if (imgOrderRamdon[i] !== imgOrderResultadoCorrecto[i]) {
         siCompleto = false;
         console.log(siCompleto);
         return siCompleto;
@@ -402,7 +378,11 @@ function Juego(initialStateJuego) {
           {/*************** presentacion de la imagen elegida *******************/}
 
           <div className="marco-foto">
-            <div className="foto-elegida apaisada" id="apaisadaNo">
+            <div
+              className={`foto-elegida ${
+                state.apaisada === true ? 'foto-apaisada' : 'foto-apaisada-no'
+              }`}
+            >
               <img
                 className="img-foto"
                 src={state.imagen300x400}
@@ -417,10 +397,13 @@ function Juego(initialStateJuego) {
           {/*************** Relleno del tablero de juego en canvas **************/}
           {/*************** presentacion del tablero de juego ********************/}
           <div
-            className={`grid-tablero apaisada grid-${state.nivelSeleccionado}`}
-            id="tablero"
+            className={`grid-tablero ${
+              state.apaisada === true
+                ? 'grid-tablero-apaisado'
+                : 'grid-tablero-apaisado-no'
+            } grid-${state.nivelSeleccionado}`}
           >
-            {arrayPiezas.map((img, index) => {
+            {state.piezas.map((img, index) => {
               return (
                 <img
                   onDragStart={(e) => dragStart(e)}
@@ -431,7 +414,7 @@ function Juego(initialStateJuego) {
                   onDragEnd={(e) => dragEnd(e)}
                   src={img.src}
                   id={img.id}
-                  key={img.src + img.id}
+                  key={img.id}
                   alt={img.id}
                 ></img>
               );
@@ -439,7 +422,11 @@ function Juego(initialStateJuego) {
           </div>
 
           {/***** Grid que contiene el avance del juego y la ultima pieza *******/}
-          <div className="grid-ultima-pieza" id="grid-apaisado-no">
+          <div
+            className={`grid-ultima-pieza ${
+              state.apaisada === true ? 'grid-apaisado' : 'grid-apaisado-no'
+            }`}
+          >
             <div className="h3-mov-time">
               <h3 className="h3-movimientos">
                 Movimientos: <span id="movimientos">0</span>
