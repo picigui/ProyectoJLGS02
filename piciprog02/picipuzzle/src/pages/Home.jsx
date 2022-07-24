@@ -20,18 +20,7 @@ import img8 from '../assets/imagen08.jpg';
 import img9 from '../assets/imagen09.jpg';
 
 import { useSelector } from 'react-redux';
-
-const imagenes = [
-  { url: img1, name: 'Imagen 1', value: 'incluidasImagen1' },
-  { url: img2, name: 'Imagen 2', value: 'incluidasImagen2' },
-  { url: img3, name: 'Imagen 3', value: 'incluidasImagen3' },
-  { url: img4, name: 'Imagen 4', value: 'incluidasImagen4' },
-  { url: img5, name: 'Imagen 5', value: 'incluidasImagen5' },
-  { url: img6, name: 'Imagen 6', value: 'incluidasImagen6' },
-  { url: img7, name: 'Imagen 7', value: 'incluidasImagen7' },
-  { url: img8, name: 'Imagen 8', value: 'incluidasImagen8' },
-  { url: img9, name: 'Imagen 9', value: 'incluidasImagen9' },
-];
+import { imagenes } from './imagenes';
 
 const niveles = [
   {
