@@ -267,7 +267,7 @@ function Home({ initialState }) {
             id="imgAPI"
             onChange={() => callAPIGatitos()}
           />
-          <label htmlFor="imgAPI"> API de gatitos: </label>
+          <label htmlFor="imgAPI"> Imagenes de la API </label>
 
           <input
             type="radio"
@@ -297,11 +297,7 @@ function Home({ initialState }) {
                 defaultValue={0}
               >
                 {state.imagenes.map((img, index) => (
-                  <option
-                    name="img-incluida"
-                    value={index}
-                    key={img.url}
-                  >
+                  <option name="img-incluida" value={index} key={img.url}>
                     {img.name}
                   </option>
                 ))}
@@ -326,7 +322,9 @@ function Home({ initialState }) {
           {/*************** Elección del nivel de juego ***************************/}
           <div className="elige-nivel">
             <form>
-              <label htmlFor="nivel">Elige el nivel al que quieres jugar: </label>
+              <label htmlFor="nivel">
+                Elige el nivel al que quieres jugar:
+              </label>
               <select
                 name="nivel"
                 id="nivel"
@@ -337,7 +335,7 @@ function Home({ initialState }) {
                   <option
                     name="nivel"
                     value={nivel.value}
-                    key={index + "-" + nivel.totalPiezas}
+                    key={index + '-' + nivel.totalPiezas}
                   >
                     {nivel.name}
                   </option>
