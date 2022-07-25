@@ -15,17 +15,19 @@ import imagenVacia from '../assets/0.jpg';
 //let imageURL;
 
 const EstiloButton = styled.button`
-  display: inline-block;
+  display: flex;
   border-radius: 3px;
-  padding: 0.5rem 0;
-  margin: 0.5rem 1rem;
-  width: 11rem;
-  border: 2px solid;
+  width: 6rem;
+  background-color: yellow;
+
+  border: 2px solid black;
   .link {
     font-size: 1.5rem;
-    margin-left: 10px;
+    margin: 0;
     text-align: center;
     text-decoration: none;
+    background-color: yellow;
+
     color: black;
   }
 `;
@@ -56,9 +58,12 @@ function juegoReducer(state, action) {
     case 'crearPiezas':
       return {
         ...state,
-        piezas: action.payload,
-        piezaVacia: action.payload[action.payload.length - 1],
-        piezasOrdenCorrecto: JSON.parse(JSON.stringify(action.payload)),
+        piezas: action.payload.arrayPiezas,
+        piezasOrdenCorrecto: JSON.parse(
+          JSON.stringify(action.payload.arrayPiezas),
+        ),
+        piezaFuera: action.payload.piezaFuera.src,
+        piezaVacia: action.payload.piezaVacia,
       };
     case 'iniciado':
       return { ...state, iniciado: true };
@@ -79,6 +84,10 @@ function juegoReducer(state, action) {
         alert('Ganaste');
       }
       return { ...state, piezaVacia: state.piezas[action.payload] };
+    case 'empezarJuego':
+      return {
+        piezaFuera: action.payload[action.payload.length - 1].src,
+      };
     // ************** si el dispatch no tiene case *****************
     default:
       throw new Error();
@@ -91,6 +100,13 @@ function Juego(initialStateJuego) {
   const store = useSelector((store) => store);
   const [state, dispatch] = useReducer(juegoReducer, store, init);
   //const [pieza, setPiezas] = useState([]);
+  let piezaVacia;
+  //let ultimaPieza;
+  //let siCompleto = false;
+
+  let imgOrderResultadoCorrecto = [];
+  //let imgOrder = [4, 2, 8, 5, 1, 10, 6, 7, 0, 3, 9, 11];
+  let imgOrderRamdon = [];
 
   useEffect(() => {
     if (state.iniciado === false) {
@@ -108,6 +124,8 @@ function Juego(initialStateJuego) {
     let arrayPiezas = [];
     let piezaCanvas = document.createElement('canvas');
     const imagen300x400 = document.querySelector('.img-foto');
+    let piezaFuera = {};
+    let i = 0;
     for (let r = 0; r < state.filas; r++) {
       for (let c = 0; c < state.columnas; c++) {
         // ************ Creando las piezas canvas *********************
@@ -127,9 +145,30 @@ function Juego(initialStateJuego) {
           src: dataURL,
           idTablero: `${r.toString()}-${c.toString()}`,
         });
+
+        // se inicia la variable con la colocacion correcta
+        imgOrderResultadoCorrecto[i] = i + 1;
+        imgOrderRamdon[i] = i + 1;
+        if (r === state.filas - 1 && c === state.columnas - 1) {
+          //  let ultimaPieza={};
+          //  ultimaPieza = { ...arrayPiezas[i] };
+          let piezaVacia = document.querySelector('.img-pieza-fuera');
+          ctx.drawImage(piezaVacia, posW, posH, state.ancho, state.alto);
+          const dataURL = piezaCanvas.toDataURL();
+          // piezaFuera = document.querySelector('.img-pieza-fuera');
+          piezaFuera.src = dataURL;
+          piezaFuera.id = 'vacia';
+          // piezaFuera.nImg = i + 1;
+          // piezaFuera.nOrdImg = i;
+          piezaVacia = { ...piezaFuera };
+        }
+        i++;
       }
     }
-    dispatch({ type: 'crearPiezas', payload: arrayPiezas });
+    dispatch({
+      type: 'crearPiezas',
+      payload: { arrayPiezas, piezaFuera, piezaVacia },
+    });
   }
 
   // ****** Creando los eventos del movimiento de piezas *******
@@ -201,9 +240,9 @@ function Juego(initialStateJuego) {
     });
     shuffle(copia);
     copia.push(ultimaPieza);
+    ultimaPieza.src = imagenVacia;
     debugger;
     idsEnOrden.forEach((id, index) => (copia[index].idTablero = id));
-    copia[copia.length - 1].src = imagenVacia;
     dispatch({ type: 'piezas', payload: copia });
     dispatch({ type: 'cambioPiezaVacia', payload: copia.length - 1 });
   }
@@ -239,6 +278,79 @@ function Juego(initialStateJuego) {
       <Header />
       <main>
         <div className="juego">
+          {/*************** presentacion del tablero de juego ********************/}
+          <div className="contenedor-tablero">
+            <div
+              className={`grid-tablero ${
+                state.apaisada === true
+                  ? 'grid-tablero-apaisado'
+                  : 'grid-tablero-apaisado-no'
+              } grid-${state.nivelSeleccionado}`}
+            >
+              {state.piezas.map((img, index) => {
+                return (
+                  <img
+                    onDragOver={(e) => dragOver(e)}
+                    onDragEnter={(e) => dragEnter(e)}
+                    onDragLeave={(e) => dragLeave(e)}
+                    onDrop={(e) => dragDrop(e)}
+                    onDragEnd={(e) => dragEnd(img)}
+                    src={img.src}
+                    id={img.id}
+                    key={img.id}
+                    alt={img.id}
+                  ></img>
+                );
+              })}
+            </div>
+            {/*************** Mensaje para presentar al final del juego *************/}
+            <h2 className="mensaje-gano">!!! Puzzle Completado ¡¡¡</h2>
+
+            {/***** Grid que contiene el avance del juego y la ultima pieza *******/}
+            <div
+              className={`grid-ultima-pieza ${
+                state.apaisada === true ? 'grid-apaisado' : 'grid-apaisado-no'
+              }`}
+            >
+              <div className="h3-mov-time">
+                <h3 className="h3-movimientos">
+                  Pasos: <span id="movimientos">0</span>
+                </h3>
+                <h3 className="h3-tiempo">Tiempo:</h3>
+                <span id="tiempo">0</span>
+              </div>
+              <div className="Botones">
+                <div className="empezar">
+                  <button
+                    onClick={empezarJuego}
+                    className="btn-empezar"
+                    type="button"
+                  >
+                    Empezar
+                  </button>
+                  <EstiloButton>
+                    <Link className="link" to="/">
+                      Home
+                    </Link>
+                  </EstiloButton>
+                </div>
+              </div>
+              <div className="div-img-pieza-fuera">
+                <img
+                  className="img-pieza-fuera"
+                  src={state.piezaFuera}
+                  // id={piezaFuera.id}
+                  alt="img-pieza-fuera"
+                  onDragOver={(e) => dragOver(e)}
+                  onDragEnter={(e) => dragEnter(e)}
+                  onDragLeave={(e) => dragLeave(e)}
+                  onDrop={(e) => dragDrop(e)}
+                  onDragEnd={(e) => dragEnd(e)}
+                />
+              </div>
+            </div>
+          </div>
+
           {/*************** presentacion de la imagen elegida *******************/}
 
           <div className="marco-foto">
@@ -254,79 +366,7 @@ function Juego(initialStateJuego) {
               ></img>
             </div>
           </div>
-
-          {/*************** Mensaje para presentar al final del juego *************/}
-          <h2 className="mensaje-gano">!!! Puzzle Completado ¡¡¡</h2>
-
-          {/*************** Relleno del tablero de juego en canvas **************/}
-          {/*************** presentacion del tablero de juego ********************/}
-          <div
-            className={`grid-tablero ${
-              state.apaisada === true
-                ? 'grid-tablero-apaisado'
-                : 'grid-tablero-apaisado-no'
-            } grid-${state.nivelSeleccionado}`}
-          >
-            {state.piezas.map((img, index) => {
-              return (
-                <img
-                  onDragOver={(e) => dragOver(e)}
-                  onDragEnter={(e) => dragEnter(e)}
-                  onDragLeave={(e) => dragLeave(e)}
-                  onDrop={(e) => dragDrop(e)}
-                  onDragEnd={(e) => dragEnd(img)}
-                  src={img.src}
-                  id={img.id}
-                  key={img.id}
-                  alt={img.id}
-                ></img>
-              );
-            })}
-          </div>
-
-          {/***** Grid que contiene el avance del juego y la ultima pieza *******/}
-          <div
-            className={`grid-ultima-pieza ${
-              state.apaisada === true ? 'grid-apaisado' : 'grid-apaisado-no'
-            }`}
-          >
-            <div className="h3-mov-time">
-              <h3 className="h3-movimientos">
-                Movimientos: <span id="movimientos">0</span>
-              </h3>
-              <h3 className="h3-tiempo">
-                Tiempo: <span id="tiempo">0</span>
-              </h3>
-              <div className="empezar">
-                <button
-                  onClick={empezarJuego}
-                  className="btn-empezar"
-                  type="button"
-                >
-                  Empezar
-                </button>
-              </div>
-            </div>
-            <div className="div-img-pieza-fuera">
-              <img
-                className="img-pieza-fuera"
-                src={state.piezaFuera}
-                // id={piezaFuera.id}
-                alt="img-pieza-fuera"
-                onDragOver={(e) => dragOver(e)}
-                onDragEnter={(e) => dragEnter(e)}
-                onDragLeave={(e) => dragLeave(e)}
-                onDrop={(e) => dragDrop(e)}
-                onDragEnd={(e) => dragEnd(e)}
-              />
-            </div>
-          </div>
         </div>
-        <EstiloButton>
-          <Link className="link" to="/">
-            Home
-          </Link>
-        </EstiloButton>
       </main>
       <Footer />
     </>

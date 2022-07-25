@@ -78,10 +78,10 @@ function init() {
   };
 }
 function configJuegoReducer(state, action) {
+  let ancho = 300;
+  let alto = 400;
   let columnas = 3;
   let filas = 4;
-  let alto = 400;
-  let ancho = 300;
 
   switch (action.type) {
     // ********** eleccion de la fuente de la imagen ***********
@@ -125,14 +125,38 @@ function configJuegoReducer(state, action) {
       document.querySelector('.foto-elegida').id = 'apaisada';
       ancho = 400;
       alto = 300;
+      if (state.nivelSeleccionado === 'n1') {
+        columnas = 4;
+        filas = 3;
+      }
+      if (state.nivelSeleccionado === 'n2') {
+        columnas = 6;
+        filas = 4;
+      }
+      if (state.nivelSeleccionado === 'n3') {
+        columnas = 8;
+        filas = 6;
+      }
 
-      return { ...state, ancho, alto, apaisada: true };
+      return { ...state, ancho, alto, filas, columnas, apaisada: true };
     case 'apaisadaNo':
       document.querySelector('.foto-elegida').id = 'apaisada-no';
       ancho = 300;
       alto = 400;
+      if (state.nivelSeleccionado === 'n1') {
+        columnas = 3;
+        filas = 4;
+      }
+      if (state.nivelSeleccionado === 'n2') {
+        columnas = 4;
+        filas = 6;
+      }
+      if (state.nivelSeleccionado === 'n3') {
+        columnas = 6;
+        filas = 8;
+      }
 
-      return { ...state, ancho, alto, apaisada: false };
+      return { ...state, ancho, alto, filas, columnas, apaisada: false };
 
     // ************** eleccion del nivel de juego ***************
     case 'n1':
