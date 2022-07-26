@@ -199,6 +199,8 @@ function configJuegoReducer(state, action) {
       }
       niveles[2].seleccionado = true;
       return { ...state, niveles, columnas, filas, nivelSeleccionado: 'n3' };
+    case 'jugar':
+      return { ...state };
 
     // ************** si el dispatch no tiene case *****************
     default:
@@ -254,6 +256,7 @@ function Home({ initialState }) {
     store.imagen300x400 = state.imageURL;
     store.piezaFuera = piezaVacia; //'../assets/0.jpg';
     store.piezaVacia = piezaVacia; //'../assets/0.jpg';
+    dispatch({ type: 'jugar' });
     console.log(store);
     return;
   }

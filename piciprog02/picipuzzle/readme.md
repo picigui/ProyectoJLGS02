@@ -1,24 +1,5 @@
 # Proyecto para final de curso de GA.
 
-## Description
-
-Se trata de una pagina en la que podrás elegir al menos entre 3 juegos sencillos; Tres en Raya, Piedra papel y tijeras o puzle.
-
-## Technical Requirements
-
-- Render a game board in the browser
-- Switch turns between X and O (or whichever markers you select)
-- Visually display which side won if a player gets three in a row or show a draw if neither wins
-- Stick with KISS (Keep It Simple Stupid) and DRY (Don't Repeat Yourself) principles
-- Use React for DOM manipulation
-- Stores the history of moves made throughout the game.
-- Use semantic markup for HTML and CSS (adhere to best practices)
-
-> Note
-> This project was based off of [this Facebook tutorial](https://facebook.github.io/react/tutorial/tutorial.html). Click inside the link to see a thorough step-by-step breakdown of building out this tic-tac-toe app. Notice that the tutorial doesn't split the components into different files.
-
-# ProyectoJLGS01
-
 ## ¿Porque se creó?
 
 La idea principal es crear un curriculum versátil que pueda ser accesible y flexible para que el cliente pueda meter sus datos desde un formulario y obtener su propio curriculum con sus fondos y detalles particulares como pueden ser su firma o logo.

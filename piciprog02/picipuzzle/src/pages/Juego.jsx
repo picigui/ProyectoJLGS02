@@ -10,10 +10,9 @@ import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import imagenVacia from '../assets/0.jpg';
 
-// valores que debo recibir de la pagina home
-// console.log(fotoElegida);
-//let imageURL;
-
+// ************ Styles components *********************
+// ****************************************************
+let terminado = false;
 const EstiloButton = styled.button`
   display: flex;
   border-radius: 3px;
@@ -32,12 +31,21 @@ const EstiloButton = styled.button`
   }
 `;
 
+// ****************************************************
+
 // Valores iniciales para los reduce de esta pagina
+// y valores que debo recibir de la pagina home
+// a traves del objeto store.
 
 function init(initial) {
   return {
+    timer: 0,
+    count: 0,
     iniciado: false,
+    terminado: false,
     apaisada: false,
+    piezas: [],
+    piezasOrdenCorrecto: [],
     nivelSeleccionado: 'n1',
     ancho: 300,
     alto: 400,
@@ -46,12 +54,13 @@ function init(initial) {
     imagen300x400: '../assets/imagen06.jpg',
     piezaFuera: imagenVacia,
     piezaVacia: imagenVacia,
-    piezas: [],
-    piezasOrdenCorrecto: [],
+    ultimaPieza: imagenVacia,
     ...initial,
-    //    ordenPiezas: arrayPiezas,
   };
 }
+
+// ************ Reducer para las actualizaciones de estado ***********
+// *******************************************************************
 
 function juegoReducer(state, action) {
   switch (action.type) {
@@ -72,38 +81,61 @@ function juegoReducer(state, action) {
     case 'piezaFuera':
       return { ...state, piezaFuera: action.payload.src };
     case 'cambioPiezaVacia':
-      const estaOrdenado =
-        JSON.stringify(state.piezas.slice(0, state.piezas.length - 1)) ===
-        JSON.stringify(
-          state.piezasOrdenCorrecto.slice(
-            0,
-            state.piezasOrdenCorrecto.length - 1,
-          ),
-        );
-      if (estaOrdenado) {
-        alert('Ganaste');
-      }
       return { ...state, piezaVacia: state.piezas[action.payload] };
     case 'empezarJuego':
       return {
         piezaFuera: action.payload[action.payload.length - 1].src,
       };
-    // ************** si el dispatch no tiene case *****************
+    case 'ganaste':
+      // return {
+      //   ...state,
+      //   ultimaPieza:
+      //     action.payload.piezasOrdenCorrecto[action.payload.piezasOrdenCorrecto.length - 1],
+      //   piezaFuera: action.payload.piezas[action.payload.piezas.length - 1],
+      //   piezas[action.payload.piezas.length - 1]: ultimaPieza,
+      // };
+      return {
+        ...state,
+        ultimaPieza: action.payload.ultimaPieza,
+        piezaFuera: action.payload.piezaFuera,
+        piezas: action.payload.piezas,
+      };
+    case 'gano':
+      // let terminado;
+      // terminado = state.terminado;
+      // if (terminado) {
+      //   terminado = false;
+      // }
+      return {
+        ...state,
+        terminado: true,
+      };
+    case 'increment':
+      const count = state.count + 1;
+      return { ...state, count };
+    case 'incrementaTimer':
+      const timer = state.timer + 1;
+      return { ...state, timer };
+    case 'resetTimer':
+      return { ...state, timer: 0 };
+
+    //************** si el dispatch no tiene case *****************
     default:
       throw new Error();
   }
 }
 
+// ************ Funcion principal que inicial la pagina ***********
+// *******************************************************************
+
 function Juego(initialStateJuego) {
   // vamos a crear una variable objeto para almacenar todos los datos
-  // que nos interesan pasar a otra pagina
+  // que nos interesan recoger de otra pagina de store que es importado
+
   const store = useSelector((store) => store);
   const [state, dispatch] = useReducer(juegoReducer, store, init);
-  //const [pieza, setPiezas] = useState([]);
   let piezaVacia;
-  //let ultimaPieza;
-  //let siCompleto = false;
-
+  let tiempo = -1;
   let imgOrderResultadoCorrecto = [];
   //let imgOrder = [4, 2, 8, 5, 1, 10, 6, 7, 0, 3, 9, 11];
   let imgOrderRamdon = [];
@@ -129,16 +161,17 @@ function Juego(initialStateJuego) {
     for (let r = 0; r < state.filas; r++) {
       for (let c = 0; c < state.columnas; c++) {
         // ************ Creando las piezas canvas *********************
-        // piezaCanvas.id = arrayCanvas[i].nombCanvas;
+        // ************************************************************
         piezaCanvas.width = state.ancho / state.columnas;
         piezaCanvas.height = state.alto / state.filas;
         let posW = r - piezaCanvas.width * c;
         let posH = c - piezaCanvas.height * r;
 
         let ctx = piezaCanvas.getContext('2d');
-        //debugger;
         ctx.drawImage(imagen300x400, posW, posH, state.ancho, state.alto);
-        // Creando las piezas imagenes
+
+        // ************ Creando las piezas imagenes *********************
+        // ************************************************************
         const dataURL = piezaCanvas.toDataURL();
         arrayPiezas.push({
           id: `${r.toString()}-${c.toString()}`,
@@ -146,9 +179,13 @@ function Juego(initialStateJuego) {
           idTablero: `${r.toString()}-${c.toString()}`,
         });
 
-        // se inicia la variable con la colocacion correcta
+        // ******** se inicia la variable con la colocacion correcta ******
+        // ****************************************************************
         imgOrderResultadoCorrecto[i] = i + 1;
         imgOrderRamdon[i] = i + 1;
+
+        // ******** Recogemos la ultima pieza y la pieza de afuera ******
+        // ****************************************************************
         if (r === state.filas - 1 && c === state.columnas - 1) {
           //  let ultimaPieza={};
           //  ultimaPieza = { ...arrayPiezas[i] };
@@ -165,6 +202,9 @@ function Juego(initialStateJuego) {
         i++;
       }
     }
+
+    //*********************  Acualizamos el estado ***********************
+    // ****************************************************************
     dispatch({
       type: 'crearPiezas',
       payload: { arrayPiezas, piezaFuera, piezaVacia },
@@ -205,6 +245,8 @@ function Juego(initialStateJuego) {
     let r2 = parseInt(vaciaCoords[0]);
     let c2 = parseInt(vaciaCoords[1]);
 
+    // Compruebo si la pieza que vamos a mover es adjacente a la pieza blanca
+    // para permitir el movimiento.
     let moveLeft = r === r2 && c2 === c - 1;
     let moveRight = r === r2 && c2 === c + 1;
 
@@ -227,10 +269,67 @@ function Juego(initialStateJuego) {
       nuevasPiezas.forEach((p, index) => (p.idTablero = idsEnOrden[index]));
       dispatch({ type: 'piezas', payload: nuevasPiezas });
       dispatch({ type: 'cambioPiezaVacia', payload: indexPiezaActual });
+      siCompleto();
     }
   }
+  function siCompleto() {
+    let estaOrdenado = false;
+    estaOrdenado =
+      JSON.stringify(state.piezas.slice(0, state.piezas.length - 1)) ===
+      JSON.stringify(
+        state.piezasOrdenCorrecto.slice(
+          0,
+          state.piezasOrdenCorrecto.length - 1,
+        ),
+      );
+    // console.log(JSON.stringify(state.piezas.slice(0, state.piezas.length - 1)));
+    // console.log(
+    //   JSON.stringify(
+    //     state.piezasOrdenCorrecto.slice(
+    //       0,
+    //       state.piezasOrdenCorrecto.length - 1,
+    //     ),
+    //   ),
+    // );
+    if (estaOrdenado) {
+      const piezas = JSON.parse(JSON.stringify(state.piezas));
+      const ultimaPieza =
+        state.piezasOrdenCorrecto[state.piezasOrdenCorrecto.length - 1];
+      const piezaFuera = piezas.pop();
+      piezas.push(ultimaPieza);
 
+      dispatch({
+        type: 'Ganaste',
+        payload: { piezas, ultimaPieza, piezaFuera },
+      });
+      gano();
+    }
+    Counter();
+    console.log(
+      'Array piezas - 1',
+      state.piezas.slice(0, state.piezas.length - 1),
+    );
+    console.log(
+      'Array piezasOrdenCorrecto - 1',
+      state.piezasOrdenCorrecto.slice(0, state.piezasOrdenCorrecto.length - 1),
+    );
+    console.log('Array piezas', state.piezas);
+    console.log('Array piezasOrdenCorrecto', state.piezasOrdenCorrecto);
+  }
+
+  // esta función se ejecuta cuando se clickea en el boton empezar y realiza
+  // un reordenado de las piezas para empezar el juego
   function empezarJuego() {
+    debugger;
+    dispatch({ type: 'resetTimer' });
+    // Revisar en un futuro se acelera al volver a renderizar el puzzle.
+    if (tiempo !== -1) {
+      clearInterval(tiempo);
+    }
+    tiempo = setInterval(() => {
+      dispatch({ type: 'incrementaTimer' });
+    }, 1000);
+    terminado = false;
     const copia = JSON.parse(JSON.stringify(state.piezasOrdenCorrecto));
     const idsEnOrden = copia.map((p) => p.id);
     const ultimaPieza = copia.pop();
@@ -238,6 +337,7 @@ function Juego(initialStateJuego) {
       type: 'piezaFuera',
       payload: JSON.parse(JSON.stringify(ultimaPieza)),
     });
+
     shuffle(copia);
     copia.push(ultimaPieza);
     ultimaPieza.src = imagenVacia;
@@ -247,21 +347,27 @@ function Juego(initialStateJuego) {
     dispatch({ type: 'cambioPiezaVacia', payload: copia.length - 1 });
   }
 
+  // Esta funcion se encarga de reorganizar cualquier array que le envies
+  // como props
   function shuffle(array) {
     let currentIndex = array.length,
       randomIndex;
-    // While there remain elements to shuffle.
+    // mientras hayan elementos para reordenar.
     while (currentIndex !== 0) {
-      // Pick a remaining element.
+      // Elija un elemento restante.
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex--;
-      // And swap it with the current element.
+      // Y cámbielo por el elemento actual.
       [array[currentIndex], array[randomIndex]] = [
         array[randomIndex],
         array[currentIndex],
       ];
     }
     return array;
+  }
+
+  function Counter() {
+    return dispatch({ type: 'increment' });
   }
 
   return (
@@ -279,6 +385,7 @@ function Juego(initialStateJuego) {
       <main>
         <div className="juego">
           {/*************** presentacion del tablero de juego ********************/}
+          {/**********************************************************************/}
           <div className="contenedor-tablero">
             <div
               className={`grid-tablero ${
@@ -303,10 +410,9 @@ function Juego(initialStateJuego) {
                 );
               })}
             </div>
-            {/*************** Mensaje para presentar al final del juego *************/}
-            <h2 className="mensaje-gano">!!! Puzzle Completado ¡¡¡</h2>
 
             {/***** Grid que contiene el avance del juego y la ultima pieza *******/}
+            {/**********************************************************************/}
             <div
               className={`grid-ultima-pieza ${
                 state.apaisada === true ? 'grid-apaisado' : 'grid-apaisado-no'
@@ -314,10 +420,10 @@ function Juego(initialStateJuego) {
             >
               <div className="h3-mov-time">
                 <h3 className="h3-movimientos">
-                  Pasos: <span id="movimientos">0</span>
+                  Pasos: <span id="movimientos">{state.count}</span>
                 </h3>
                 <h3 className="h3-tiempo">Tiempo:</h3>
-                <span id="tiempo">0</span>
+                <span id="tiempo">{state.timer}</span>
               </div>
               <div className="Botones">
                 <div className="empezar">
@@ -350,8 +456,17 @@ function Juego(initialStateJuego) {
               </div>
             </div>
           </div>
+          {/*************** Mensaje para presentar al final del juego *************/}
+          {/**********************************************************************/}
+          <h2
+            className="mensaje-gano"
+            id={`${terminado === true ? '' : 'ocultar'}`}
+          >
+            !!! Puzzle Completado ¡¡¡
+          </h2>
 
           {/*************** presentacion de la imagen elegida *******************/}
+          {/**********************************************************************/}
 
           <div className="marco-foto">
             <div
@@ -367,9 +482,23 @@ function Juego(initialStateJuego) {
             </div>
           </div>
         </div>
+        <button className="btn-empezar" type="button" onClick={gano}>
+          ganó
+        </button>
+        <button className="btn-empezar" type="button" onClick={perdio}>
+          perdió
+        </button>
       </main>
       <Footer />
     </>
   );
+  function gano() {
+    terminado = true;
+    return dispatch({ type: 'gano' });
+  }
+  function perdio() {
+    terminado = false;
+    return;
+  }
 }
 export default Juego;
