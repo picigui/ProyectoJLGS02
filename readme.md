@@ -1,31 +1,44 @@
-# Proyecto para final de curso de GA.
+# Proyecto para final de curso de GA. ---> ![Design preview](./piciprog02/picipuzzle/src/assets/logo-pici24x33.png)
 
 ## ¿Porque se creó?
 
-La idea principal es crear un curriculum versátil que pueda ser accesible y flexible para que el cliente pueda meter sus datos desde un formulario y obtener su propio curriculum con sus fondos y detalles particulares como pueden ser su firma o logo.
+La idea principal es conseguir lograr un sitio de juegos multiples o juegos reunidos para que el cansado y estresado se relaje con pequeños juegos para ejercitar su mente.
 
-Es decir este sería el boceto principal o uno de los bocetos a elegir con del fin de que cada cliente elija los suyos según sus gustos.
-
-Creo que este tipo de curriculum dado los tiempos que corren y el auge actual de la tecnología hoy día es algo cada vez mas necesario.
+Es decir este sería el boceto principal o uno de los bocetos para incrementar en un futuro no muy lejano, en el que pienso estar.
 
 ## Metodologia
 
-El programa esta basado y elaborado utilizando el sistema grid y flex, para obtener la flexibilidad necesaria y ser lo más responsiva y versátil posible para adaptarse a los datos e imágenes que pueda aportar el cliente.
+El programa esta basado y elaborado utilizando el sistema grid, flex, canvas para obtener la flexibilidad necesaria y ser lo más responsiva y versátil posible para adaptarse a los datos e imágenes que pueda aportar el cliente.
+
+## Bocetos de inicio del proyeco
+
+Esta era la idea inicial.
+
+![Design preview](./piciprog02/picipuzzle/src/Bocetos/Picipuzle-mobile.png)
+
+![Design preview](./piciprog02/picipuzzle/src/Bocetos/Picipuzle-desktop.jpg)
+
+![Design preview](./piciprog02/picipuzzle/src/Bocetos/Home.jpg)
+
+Este fue el primer Boceto conseguido:
+
+![Design preview](./piciprog02/picipuzzle/src/Bocetos/boceto.png)
 
 ## Responsivo
 
-Por el volumen de información la presentación en pantalla de ordenador se ha limitado a un máximo de `900px` centrando la pagina en la pantalla para evitar distorcionamientos excesivos e incomodidades al cliente a la hora de leer la información, también se ha estimado un mínimo de ancho en el html de `250px` para evitar de la misma forma lecturas incomodas.
-
-Tambien se producen algunos cambios cuando la resolucion `550px` o inferior para evitar desajustes y visiones feas de la pantalla.
+Este apartado aun esta en desarrollo.
 
 ## Moviles:
 
-A partir de los `375px` hacia abajo se oculta el menú navegador de la cabecera, y aparece un icono para un menú desplegable por el que se puede navegar de igual forma. A la vez se realiza un reajuste de todos los componentes para adaptarse al tamaño de los dispositivos móviles.
+Este apartado aun esta en desarrollo.
 
 ## Dificultades:
 
-Dado el empeño de utilizar solo `html y css`. Reconozco que el código es mucho mas largo y que habrían muchas mas ventajas usando `JS`. Sin embargo ha sido todo un reto gratificante como el que menos. Detalles como el menú desplegable o la presentación de los cuadros de textos con los datos solicitados por el menu sin utilizar Java Scripts, son retos que merecen la pena superar, por lo menos desde mi punto de vista.
+La mayor dificultad del programa fué el sistema canvas que ha cambiado mucho en estos ultimos años y la informacion que existe en la red es muy poco clara, por lo que tuve que hacer mil pruebas por mi cuenta. Es por eso por lo que la maquetacion y algunos otros detalles estan descuidados.
+
+Pero sin embargo puedo decir que con respecto al manejo de canvas. !!!!! Reto superado !!!!!
 
 ## Acceso al proyecto:
 
-https://github.com/picigui/ProyectoJLGS01
+https://github.com/picigui/ProyectoJLGS02
+https://moonlit-travesseiro-3513cc.netlify.app/
