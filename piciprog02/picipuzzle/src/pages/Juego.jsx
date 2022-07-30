@@ -9,6 +9,7 @@ import { Footer } from '../components/Footer';
 import { useSelector } from 'react-redux';
 import imagenVacia from '../assets/0.jpg';
 import { ContadorReloj } from '../utils/ContadorReloj';
+import { getRecords, saveNewRecord } from '../utils/AlmacenDeDatos';
 
 // ************ Styles components *********************
 // ****************************************************
@@ -87,9 +88,22 @@ function juegoReducer(state, action) {
       return { ...state, piezas: action.payload };
     case 'piezaFuera':
       return { ...state, piezaFuera: action.payload };
+    case 'record':
+      return {
+        ...state,
+        recordAnteriorNombre: action.payload.player,
+        recordAnteriorSegundos: action.payload.seconds,
+      };
     case 'cambioPiezaVacia':
       return { ...state, piezaVacia: state.piezas[action.payload] };
-
+    case 'nuevoGanador':
+      return { ...state, nuevoGanador: action.payload };
+    case 'nuevoTiempo':
+      return {
+        ...state,
+        seconds: action.payload,
+        recordSuperado: state.recordAnteriorSegundos > action.payload,
+      };
     case 'ganaste':
       return {
         ...state,
@@ -135,6 +149,10 @@ function Juego(initialStateJuego) {
       // store.iniciado = true;
       // store.terminado = false;
       crearPiezasCanvas();
+      dispatch({
+        type: 'record',
+        payload: getRecords(state.nivelSeleccionado),
+      });
     }
   });
 
@@ -368,6 +386,24 @@ function Juego(initialStateJuego) {
     return array;
   }
 
+  function tiempoFinalizado(date) {
+    console.log({ date });
+    if (date) {
+      dispatch({ type: 'nuevoTiempo', payload: date.getUTCSeconds() });
+      //XXX: CAMBIAR ESTO
+      // setInterval(() => {
+      //   console.log({ state });
+      // }, 2000);
+    }
+  }
+
+  function cambiarNombreRecord(nuevoNombre) {
+    dispatch({ type: 'nuevoGanador', payload: nuevoNombre });
+  }
+  function guardarRecord() {
+    saveNewRecord(state.nuevoGanador, state.seconds, state.nivelSeleccionado);
+  }
+
   function Counter() {
     return dispatch({ type: 'incrementaCount' });
   }
@@ -426,7 +462,10 @@ function Juego(initialStateJuego) {
                 </h3>
                 {/* <h3 className="h3-tiempo">Tiempo:</h3>
                 <span id="tiempo">{state.timer}</span> */}
-                <ContadorReloj jugando={state.jugando} />
+                <ContadorReloj
+                  tiempoFinalizado={tiempoFinalizado}
+                  jugando={state.jugando}
+                />
               </div>
               <div className="Botones">
                 <div className="empezar">
@@ -467,6 +506,29 @@ function Juego(initialStateJuego) {
           >
             !!! Puzzle Completado ¡¡¡
           </h2>
+          <div>
+            <p>
+              <b>Record anterior de </b>
+              {state.recordAnteriorNombre}
+            </p>
+            <p>
+              <b>Tiempo: </b>
+              {state.recordAnteriorSegundos} segundos
+            </p>
+          </div>
+
+          {state.terminado && state.recordSuperado ? (
+            <div>
+              <input
+                onChange={(e) => cambiarNombreRecord(e.target.value)}
+                type="text"
+                placeholder="Tu nombre"
+              />
+              <button onClick={guardarRecord}>Guardar puntuación</button>
+            </div>
+          ) : (
+            ''
+          )}
 
           {/*************** presentacion de la imagen elegida *******************/}
           {/**********************************************************************/}
@@ -497,7 +559,7 @@ function Juego(initialStateJuego) {
       <Footer />
     </>
   );
-  }
+}
 
 export default Juego;
 
