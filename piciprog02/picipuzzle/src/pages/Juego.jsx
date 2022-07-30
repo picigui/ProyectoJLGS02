@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import styled from 'styled-components';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Helmet } from 'react-helmet';
@@ -7,11 +7,13 @@ import '../styles/juego.css';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { useSelector } from 'react-redux';
-import { useEffect } from 'react';
 import imagenVacia from '../assets/0.jpg';
+import imgPrueba from '../assets/0.jpg';
+import { ContadorReloj } from '../utils/ContadorReloj';
 
 // ************ Styles components *********************
 // ****************************************************
+
 let terminado = false;
 const EstiloButton = styled.button`
   display: flex;
@@ -39,20 +41,23 @@ const EstiloButton = styled.button`
 
 function init(initial) {
   return {
+    initReloj: null,
     timer: 0,
     count: 0,
     iniciado: false,
+    jugando: false,
     terminado: false,
     apaisada: false,
     piezas: [],
     piezasOrdenCorrecto: [],
+    imgOrderResultadoCorrecto: [],
     nivelSeleccionado: 'n1',
     ancho: 300,
     alto: 400,
     columnas: 3,
     filas: 4,
     imagen300x400: '../assets/imagen06.jpg',
-    piezaFuera: imagenVacia,
+    piezaFuera: { src: imagenVacia },
     piezaVacia: imagenVacia,
     ultimaPieza: imagenVacia,
     ...initial,
@@ -63,6 +68,7 @@ function init(initial) {
 // *******************************************************************
 
 function juegoReducer(state, action) {
+  //debugger;
   switch (action.type) {
     case 'crearPiezas':
       return {
@@ -71,46 +77,36 @@ function juegoReducer(state, action) {
         piezasOrdenCorrecto: JSON.parse(
           JSON.stringify(action.payload.arrayPiezas),
         ),
-        piezaFuera: action.payload.piezaFuera.src,
-        piezaVacia: action.payload.piezaVacia,
+        piezaFuera: action.payload.piezaFuera,
+        piezaVacia: action.payload.piezaVacia.src,
+        ultimaPieza: action.payload.ultimaPieza.src,
       };
     case 'iniciado':
-      return { ...state, iniciado: true };
+      return { ...state, iniciado: true, jugando: false };
+    case 'jugando':
+      return { ...state, jugando: true };
     case 'piezas':
       return { ...state, piezas: action.payload };
     case 'piezaFuera':
-      return { ...state, piezaFuera: action.payload.src };
+      return { ...state, piezaFuera: action.payload };
     case 'cambioPiezaVacia':
       return { ...state, piezaVacia: state.piezas[action.payload] };
-    case 'empezarJuego':
-      return {
-        piezaFuera: action.payload[action.payload.length - 1].src,
-      };
+
     case 'ganaste':
-      // return {
-      //   ...state,
-      //   ultimaPieza:
-      //     action.payload.piezasOrdenCorrecto[action.payload.piezasOrdenCorrecto.length - 1],
-      //   piezaFuera: action.payload.piezas[action.payload.piezas.length - 1],
-      //   piezas[action.payload.piezas.length - 1]: ultimaPieza,
-      // };
       return {
         ...state,
-        ultimaPieza: action.payload.ultimaPieza,
         piezaFuera: action.payload.piezaFuera,
         piezas: action.payload.piezas,
+        terminado: true,
+        jugando: false,
       };
     case 'gano':
-      // let terminado;
-      // terminado = state.terminado;
-      // if (terminado) {
-      //   terminado = false;
-      // }
-      return {
-        ...state,
-        terminado: true,
-      };
-    case 'increment':
+    //   return {
+    //     ...state,
+    //     terminado: true,
+    //     jugando: false,
+    //   };
+    case 'incrementaCount':
       const count = state.count + 1;
       return { ...state, count };
     case 'incrementaTimer':
@@ -134,19 +130,18 @@ function Juego(initialStateJuego) {
 
   const store = useSelector((store) => store);
   const [state, dispatch] = useReducer(juegoReducer, store, init);
-  let piezaVacia;
-  let tiempo = -1;
-  let imgOrderResultadoCorrecto = [];
+  let piezaVacia = {};
+  //let tiempo = -1;
+  //let imgOrderResultadoCorrecto = [];
   //let imgOrder = [4, 2, 8, 5, 1, 10, 6, 7, 0, 3, 9, 11];
   let imgOrderRamdon = [];
-
+  store.jugando = false;
   useEffect(() => {
     if (state.iniciado === false) {
       dispatch({ type: 'iniciado' });
-      state.iniciado = true;
-      // setTimeout(() => {
-      //   crearPiezasCanvas();
-      // }, 200);
+      // state.iniciado = true;
+      // store.iniciado = true;
+      // store.terminado = false;
       crearPiezasCanvas();
     }
   });
@@ -154,6 +149,7 @@ function Juego(initialStateJuego) {
   //debugger;
   function crearPiezasCanvas() {
     let arrayPiezas = [];
+    let ultimaPieza = {};
     let piezaCanvas = document.createElement('canvas');
     const imagen300x400 = document.querySelector('.img-foto');
     let piezaFuera = {};
@@ -163,9 +159,10 @@ function Juego(initialStateJuego) {
         // ************ Creando las piezas canvas *********************
         // ************************************************************
         piezaCanvas.width = state.ancho / state.columnas;
+        debugger;
         piezaCanvas.height = state.alto / state.filas;
-        let posW = r - piezaCanvas.width * c;
-        let posH = c - piezaCanvas.height * r;
+        let posW = 0 - piezaCanvas.width * c;
+        let posH = 0 - piezaCanvas.height * r;
 
         let ctx = piezaCanvas.getContext('2d');
         ctx.drawImage(imagen300x400, posW, posH, state.ancho, state.alto);
@@ -177,26 +174,27 @@ function Juego(initialStateJuego) {
           id: `${r.toString()}-${c.toString()}`,
           src: dataURL,
           idTablero: `${r.toString()}-${c.toString()}`,
+          nImg: i + 1,
+          nOrdImg: i,
         });
 
         // ******** se inicia la variable con la colocacion correcta ******
         // ****************************************************************
-        imgOrderResultadoCorrecto[i] = i + 1;
+        state.imgOrderResultadoCorrecto[i] = i + 1;
         imgOrderRamdon[i] = i + 1;
 
         // ******** Recogemos la ultima pieza y la pieza de afuera ******
         // ****************************************************************
         if (r === state.filas - 1 && c === state.columnas - 1) {
-          //  let ultimaPieza={};
-          //  ultimaPieza = { ...arrayPiezas[i] };
+          ultimaPieza = { ...arrayPiezas[i] };
           let piezaVacia = document.querySelector('.img-pieza-fuera');
-          ctx.drawImage(piezaVacia, posW, posH, state.ancho, state.alto);
+          ctx.drawImage(piezaVacia, 0, 0, state.ancho, state.alto);
           const dataURL = piezaCanvas.toDataURL();
           // piezaFuera = document.querySelector('.img-pieza-fuera');
           piezaFuera.src = dataURL;
           piezaFuera.id = 'vacia';
-          // piezaFuera.nImg = i + 1;
-          // piezaFuera.nOrdImg = i;
+          piezaFuera.nImg = i + 1;
+          piezaFuera.nOrdImg = i;
           piezaVacia = { ...piezaFuera };
         }
         i++;
@@ -207,7 +205,12 @@ function Juego(initialStateJuego) {
     // ****************************************************************
     dispatch({
       type: 'crearPiezas',
-      payload: { arrayPiezas, piezaFuera, piezaVacia },
+      payload: {
+        arrayPiezas,
+        piezaFuera,
+        piezaVacia,
+        ultimaPieza,
+      },
     });
   }
 
@@ -231,10 +234,8 @@ function Juego(initialStateJuego) {
 
   // despues de arrastrar y soltar, intercambie los dos piezas
   function dragEnd(pieza) {
-    //debugger;
     // Tomo nota de las coodenadas de la pieza pinchada.
     let actualPieza = pieza;
-    debugger;
     let actualCoords = actualPieza.idTablero.split('-'); // nos dará "0-0" --> ["0", "0"]
     let r = parseInt(actualCoords[0]);
     let c = parseInt(actualCoords[1]);
@@ -265,44 +266,33 @@ function Juego(initialStateJuego) {
       const nuevasPiezas = [...state.piezas];
       nuevasPiezas[indexPiezaActual] = copia;
       nuevasPiezas[indexPiezaVacia] = state.piezas[indexPiezaActual];
+      state.piezas = [...nuevasPiezas];
       const idsEnOrden = state.piezasOrdenCorrecto.map((p) => p.id);
       nuevasPiezas.forEach((p, index) => (p.idTablero = idsEnOrden[index]));
-      dispatch({ type: 'piezas', payload: nuevasPiezas });
       dispatch({ type: 'cambioPiezaVacia', payload: indexPiezaActual });
       siCompleto();
     }
   }
+
   function siCompleto() {
-    let estaOrdenado = false;
-    estaOrdenado =
-      JSON.stringify(state.piezas.slice(0, state.piezas.length - 1)) ===
-      JSON.stringify(
-        state.piezasOrdenCorrecto.slice(
-          0,
-          state.piezasOrdenCorrecto.length - 1,
-        ),
-      );
-    // console.log(JSON.stringify(state.piezas.slice(0, state.piezas.length - 1)));
-    // console.log(
-    //   JSON.stringify(
-    //     state.piezasOrdenCorrecto.slice(
-    //       0,
-    //       state.piezasOrdenCorrecto.length - 1,
-    //     ),
-    //   ),
-    // );
+    let estaOrdenado = true;
+    for (let i = 0; i < state.piezas.length - 1; i++) {
+      if (state.piezas[i].nImg !== i + 1) {
+        estaOrdenado = false;
+      }
+    }
     if (estaOrdenado) {
+      debugger;
       const piezas = JSON.parse(JSON.stringify(state.piezas));
       const ultimaPieza =
         state.piezasOrdenCorrecto[state.piezasOrdenCorrecto.length - 1];
       const piezaFuera = piezas.pop();
       piezas.push(ultimaPieza);
-
+      store.terminado = true;
       dispatch({
-        type: 'Ganaste',
-        payload: { piezas, ultimaPieza, piezaFuera },
+        type: 'ganaste',
+        payload: { piezas, piezaFuera: piezaFuera },
       });
-      gano();
     }
     Counter();
     console.log(
@@ -317,32 +307,52 @@ function Juego(initialStateJuego) {
     console.log('Array piezasOrdenCorrecto', state.piezasOrdenCorrecto);
   }
 
+  function hacerTrampa() {
+    console.log('Las ordeno');
+    console.log({ piezas: state.piezas });
+    const ordenadas = JSON.parse(JSON.stringify(state.piezas)).sort(compare);
+    console.log({ piezas: ordenadas });
+    state.piezasOrdenCorrecto.forEach(
+      (p, idx) => (ordenadas[idx].idTablero = p.idTablero),
+    );
+    const ultima = ordenadas.pop();
+    const penultima = ordenadas.pop();
+    ordenadas.push(ultima);
+    ordenadas.push(penultima);
+    dispatch({ type: 'piezas', payload: ordenadas });
+    dispatch({ type: 'cambioPiezaVacia', payload: ordenadas.length - 2 });
+  }
+
+  function compare(a, b) {
+    if (a.nImg < b.nImg) {
+      return -1;
+    }
+    if (a.nImg > b.nImg) {
+      return 1;
+    }
+    return 0;
+  }
+
   // esta función se ejecuta cuando se clickea en el boton empezar y realiza
   // un reordenado de las piezas para empezar el juego
   function empezarJuego() {
-    debugger;
-    dispatch({ type: 'resetTimer' });
-    // Revisar en un futuro se acelera al volver a renderizar el puzzle.
-    if (tiempo !== -1) {
-      clearInterval(tiempo);
-    }
-    tiempo = setInterval(() => {
-      dispatch({ type: 'incrementaTimer' });
-    }, 1000);
-    terminado = false;
     const copia = JSON.parse(JSON.stringify(state.piezasOrdenCorrecto));
     const idsEnOrden = copia.map((p) => p.id);
     const ultimaPieza = copia.pop();
     dispatch({
       type: 'piezaFuera',
-      payload: JSON.parse(JSON.stringify(ultimaPieza)),
+      payload: { ...ultimaPieza },
     });
 
     shuffle(copia);
     copia.push(ultimaPieza);
     ultimaPieza.src = imagenVacia;
-    debugger;
+    //debugger;
     idsEnOrden.forEach((id, index) => (copia[index].idTablero = id));
+    store.initReloj = true;
+    store.jugando = true;
+    dispatch({ type: 'jugando' });
+
     dispatch({ type: 'piezas', payload: copia });
     dispatch({ type: 'cambioPiezaVacia', payload: copia.length - 1 });
   }
@@ -367,7 +377,7 @@ function Juego(initialStateJuego) {
   }
 
   function Counter() {
-    return dispatch({ type: 'increment' });
+    return dispatch({ type: 'incrementaCount' });
   }
 
   return (
@@ -422,8 +432,9 @@ function Juego(initialStateJuego) {
                 <h3 className="h3-movimientos">
                   Pasos: <span id="movimientos">{state.count}</span>
                 </h3>
-                <h3 className="h3-tiempo">Tiempo:</h3>
-                <span id="tiempo">{state.timer}</span>
+                {/* <h3 className="h3-tiempo">Tiempo:</h3>
+                <span id="tiempo">{state.timer}</span> */}
+                <ContadorReloj jugando={state.jugando} />
               </div>
               <div className="Botones">
                 <div className="empezar">
@@ -444,7 +455,7 @@ function Juego(initialStateJuego) {
               <div className="div-img-pieza-fuera">
                 <img
                   className="img-pieza-fuera"
-                  src={state.piezaFuera}
+                  src={state.piezaFuera.src}
                   // id={piezaFuera.id}
                   alt="img-pieza-fuera"
                   onDragOver={(e) => dragOver(e)}
@@ -460,7 +471,7 @@ function Juego(initialStateJuego) {
           {/**********************************************************************/}
           <h2
             className="mensaje-gano"
-            id={`${terminado === true ? '' : 'ocultar'}`}
+            id={`${state.terminado === true ? '' : 'ocultar'}`}
           >
             !!! Puzzle Completado ¡¡¡
           </h2>
@@ -482,10 +493,28 @@ function Juego(initialStateJuego) {
             </div>
           </div>
         </div>
-        <button className="btn-empezar" type="button" onClick={gano}>
+        <button
+          className="btn-empezar"
+          id="ocultar"
+          type="button"
+          onClick={gano}
+        >
           ganó
         </button>
-        <button className="btn-empezar" type="button" onClick={perdio}>
+        <button
+          className="btn-empezar"
+          id="ocultar"
+          type="button"
+          onClick={hacerTrampa}
+        >
+          trampa
+        </button>
+        <button
+          className="btn-empezar"
+          id="ocultar"
+          type="button"
+          onClick={perdio}
+        >
           perdió
         </button>
       </main>
@@ -494,7 +523,7 @@ function Juego(initialStateJuego) {
   );
   function gano() {
     terminado = true;
-    return dispatch({ type: 'gano' });
+    return dispatch({ type: 'ganaste' });
   }
   function perdio() {
     terminado = false;
@@ -502,3 +531,8 @@ function Juego(initialStateJuego) {
   }
 }
 export default Juego;
+
+//REPARAR-ESTO: CAMBIAR ESTO
+//PENDIENTE-HACER:: CAMBIAR ESTO
+//REVISAR: CAMBIAR ESTO
+//XXX: CAMBIAR ESTO

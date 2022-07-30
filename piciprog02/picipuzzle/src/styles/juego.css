@@ -6,6 +6,14 @@
   flex-direction: column;
   align-items: center;
 }
+
+.imgPrueba {
+  display: flex;
+  position: absolute;
+  margin-top: -50px;
+  width: 50px;
+  height: 50px;
+}
 /* ---------------------- 850px ------------------- */
 /*** a esta resolucion se ajustan algunos valores para una mejor vision ****/
 
@@ -47,21 +55,21 @@
   cursor: pointer;
 }
 
-.grid-tablero-apaisado {
-  width: 405px;
-  height: 305px;
-}
+/* .grid-tablero-apaisado {
+  width: 410px;
+  height: 310px;
+} */
 .grid-tablero-apaisado.grid-n1 {
-  grid-template-columns: repeat(4, calc(400px / 4));
-  grid-template-rows: repeat(3, calc(300px / 3));
+  grid-template-columns: repeat(4, calc(405px / 4));
+  grid-template-rows: repeat(3, calc(305px / 3));
 }
 .grid-tablero-apaisado.grid-n1 img {
   width: calc(405px / 4);
   height: calc(305px / 3);
 }
 .grid-tablero-apaisado.grid-n2 {
-  grid-template-columns: repeat(6, calc(400px / 6));
-  grid-template-rows: repeat(4, calc(300px / 4));
+  grid-template-columns: repeat(6, calc(405px / 6));
+  grid-template-rows: repeat(4, calc(305px / 4));
 }
 .grid-tablero-apaisado.grid-n2 img {
   width: calc(405px / 6);
@@ -75,10 +83,10 @@
   width: calc(405px / 8);
   height: calc(305px / 6);
 }
-.grid-tablero-apaisado-no {
+/* .grid-tablero-apaisado-no {
   width: 305px;
   height: 405px;
-}
+} */
 .grid-tablero-apaisado-no.grid-n1 {
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(4, 1fr);
@@ -122,7 +130,7 @@
 }
 .grid-tablero-apaisado-no.grid-n1 + .grid-ultima-pieza .div-img-pieza-fuera {
   width: calc(305px / 3);
-  height: calc(400px / 4);
+  height: calc(405px / 4);
 }
 .grid-tablero-apaisado-no.grid-n2 + .grid-ultima-pieza .div-img-pieza-fuera {
   width: calc(305px / 4);
@@ -139,7 +147,10 @@
 .h3-mov-time {
   grid-column: 1/2;
 }
-
+.h3-movimientos {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
 .btn-empezar {
   height: 2rem;
   margin: 1rem;
@@ -153,7 +164,7 @@
 
 .grid-ultima-pieza {
   display: grid;
-  grid-template-columns: repeat(2, 1fr) 100px;
+  grid-template-columns: repeat(3, 100px);
   grid-template-rows: 1.5fr;
   width: 305px;
   height: 156px;
@@ -168,8 +179,8 @@
   width: 305px;
 }
 .div-img-pieza-fuera {
-  margin-top: -5px;
-  margin-right: 2px;
+  margin-top: -7px;
+  margin-right: -1px;
   justify-self: end;
   display: flex;
   align-self: flex-start;

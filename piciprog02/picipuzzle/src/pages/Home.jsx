@@ -8,8 +8,6 @@ import '../styles/index.css';
 
 /***************  Carga de imagenes predeterminadas ************/
 
-import piezaVacia from '../assets/0.jpg';
-
 // Se importa esta funcion para poder asceder al Store almacenado
 import { useSelector } from 'react-redux';
 import { getImagenes } from '../utils/imagenes';
@@ -254,8 +252,6 @@ function Home({ initialState }) {
     store.columnas = state.columnas;
     store.filas = state.filas;
     store.imagen300x400 = state.imageURL;
-    store.piezaFuera = piezaVacia; //'../assets/0.jpg';
-    store.piezaVacia = piezaVacia; //'../assets/0.jpg';
     dispatch({ type: 'jugar' });
     console.log(store);
     return;
