@@ -8,13 +8,11 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { useSelector } from 'react-redux';
 import imagenVacia from '../assets/0.jpg';
-import imgPrueba from '../assets/0.jpg';
 import { ContadorReloj } from '../utils/ContadorReloj';
 
 // ************ Styles components *********************
 // ****************************************************
 
-let terminado = false;
 const EstiloButton = styled.button`
   display: flex;
   border-radius: 3px;
@@ -100,12 +98,6 @@ function juegoReducer(state, action) {
         terminado: true,
         jugando: false,
       };
-    case 'gano':
-    //   return {
-    //     ...state,
-    //     terminado: true,
-    //     jugando: false,
-    //   };
     case 'incrementaCount':
       const count = state.count + 1;
       return { ...state, count };
@@ -497,39 +489,16 @@ function Juego(initialStateJuego) {
           className="btn-empezar"
           id="ocultar"
           type="button"
-          onClick={gano}
-        >
-          ganó
-        </button>
-        <button
-          className="btn-empezar"
-          id="ocultar"
-          type="button"
           onClick={hacerTrampa}
         >
           trampa
-        </button>
-        <button
-          className="btn-empezar"
-          id="ocultar"
-          type="button"
-          onClick={perdio}
-        >
-          perdió
         </button>
       </main>
       <Footer />
     </>
   );
-  function gano() {
-    terminado = true;
-    return dispatch({ type: 'ganaste' });
   }
-  function perdio() {
-    terminado = false;
-    return;
-  }
-}
+
 export default Juego;
 
 //REPARAR-ESTO: CAMBIAR ESTO

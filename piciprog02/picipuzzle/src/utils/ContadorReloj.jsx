@@ -1,5 +1,4 @@
 import React, { useReducer, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 // ************ Styles components *********************
@@ -60,7 +59,7 @@ function relojReducer(state, action) {
 // ************ Funcion principal que inicial la pagina ***********
 // *******************************************************************
 
-export function ContadorReloj({ jugando }) {
+export function ContadorReloj({ jugando, tiempoFinalizado }) {
   const [state, dispatch] = useReducer(relojReducer, { jugando }, init);
 
   const tick = () => {
@@ -72,8 +71,12 @@ export function ContadorReloj({ jugando }) {
     if (jugando !== false) {
       // dispatch({ type: 'jugando' });
       iniciarReloj();
+    } else {
+      tiempoFinalizado(state.diferenciaTiempo);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jugando]);
+
   const iniciarReloj = () => {
     dispatch({ type: 'iniciaReloj', payload: +new Date() });
   };
@@ -84,6 +87,7 @@ export function ContadorReloj({ jugando }) {
       requestAnimationFrame(tick);
       // dispatch({ type: 'iniciaReloj', payload: requestAnimationFrame(tick) });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.initReloj]); // [state.initReloj]);
 
   useEffect(() => {
@@ -99,6 +103,7 @@ export function ContadorReloj({ jugando }) {
       //   payload: requestAnimationFrame(tick),
       // });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.diferenciaTiempo]);
 
   return (
